@@ -7,10 +7,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import org.koin.compose.koinViewModel
+import androidx.compose.runtime.remember
+import org.koin.core.context.GlobalContext
 import org.julienjnnqin.luxmateapp.core.theme.LuxMateAppTheme
 import org.julienjnnqin.luxmateapp.di.initializeKoin
 import org.julienjnnqin.luxmateapp.presentation.AppViewModel
@@ -24,6 +22,11 @@ import org.julienjnnqin.luxmateapp.presentation.screen.teachers.TeachersViewMode
 import org.julienjnnqin.luxmateapp.presentation.screen.teacherdetail.TeacherDetailScreen
 import org.julienjnnqin.luxmateapp.presentation.screen.profile.ProfileScreen
 import org.julienjnnqin.luxmateapp.presentation.screen.profile.ProfileViewModel
+
+@Composable
+inline fun <reified T : Any> rememberKoinInstance(): T {
+    return remember { GlobalContext.get().get<T>() }
+}
 
 @Composable
 @Preview
@@ -42,7 +45,7 @@ fun App() {
 
 @Composable
 fun AppNavigation() {
-    val appViewModel: AppViewModel = koinViewModel()
+    val appViewModel: AppViewModel = rememberKoinInstance()
     val appState = appViewModel.appState.collectAsState().value
 
     when {
@@ -55,7 +58,7 @@ fun AppNavigation() {
             }
         }
         !appState.isOnboardingCompleted -> {
-            val onboardingViewModel: OnboardingViewModel = koinViewModel()
+            val onboardingViewModel: OnboardingViewModel = rememberKoinInstance()
             OnboardingScreen(
                 viewModel = onboardingViewModel,
                 onComplete = {
@@ -64,7 +67,7 @@ fun AppNavigation() {
             )
         }
         appState.currentScreen == Screen.Login -> {
-            val loginViewModel: LoginViewModel = koinViewModel()
+            val loginViewModel: LoginViewModel = rememberKoinInstance()
             LoginScreen(
                 viewModel = loginViewModel,
                 onLoginSuccess = {
@@ -73,7 +76,7 @@ fun AppNavigation() {
             )
         }
         appState.currentScreen == Screen.Teachers -> {
-            val teachersViewModel: TeachersViewModel = koinViewModel()
+            val teachersViewModel: TeachersViewModel = rememberKoinInstance()
             TeachersScreen(
                 viewModel = teachersViewModel,
                 onTeacherSelected = { teacherId ->
@@ -86,7 +89,7 @@ fun AppNavigation() {
         }
         is Screen.TeacherDetail -> {
             val teacherId = (appState.currentScreen as Screen.TeacherDetail).teacherId
-            val teachersViewModel: TeachersViewModel = koinViewModel()
+            val teachersViewModel: TeachersViewModel = rememberKoinInstance()
             val teacher = teachersViewModel.uiState.collectAsState().value.teachers.find { it.id == teacherId }
 
             if (teacher != null) {
@@ -102,7 +105,7 @@ fun AppNavigation() {
             }
         }
         appState.currentScreen == Screen.Profile -> {
-            val profileViewModel: ProfileViewModel = koinViewModel()
+            val profileViewModel: ProfileViewModel = rememberKoinInstance()
             ProfileScreen(
                 viewModel = profileViewModel,
                 onBackClick = {

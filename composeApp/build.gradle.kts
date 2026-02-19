@@ -40,7 +40,7 @@ kotlin {
             implementation(libs.androidx.datastore.preferences)
             implementation(libs.koin.android)
             implementation(libs.ktor.client.okhttp)
-
+            implementation(libs.koin.compose)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -53,26 +53,20 @@ kotlin {
             implementation(compose.components.resources)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
-            implementation(libs.androidx.navigation.compose)
             implementation(libs.koin.core)
-            implementation(libs.koin.compose)
             implementation(libs.kotlin.serialization)
             implementation(libs.coil.compose)
             implementation(compose.components.uiToolingPreview)
-
-            implementation(libs.navigation.compose)
             implementation(libs.material.icons.core)
-
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.jetbrains.navigation3.ui)
+            implementation(libs.jetbrains.material3.adaptiveNavigation3)
+            implementation(libs.jetbrains.lifecycle.viewmodelNavigation3)
 
-            implementation(libs.coil.compose)
-            implementation(libs.koin.core)
-
-            //Material Icons
+            // Material Icons
             implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
-
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
