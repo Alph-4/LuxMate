@@ -33,9 +33,11 @@ fun TeachersScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.statusBars)
             .background(MaterialTheme.colorScheme.background)
     ) {
         // Header avec TopAppBar
@@ -100,7 +102,7 @@ fun TeachersScreen(
             }
         }
     }
-}
+    }
 
 
 @Composable

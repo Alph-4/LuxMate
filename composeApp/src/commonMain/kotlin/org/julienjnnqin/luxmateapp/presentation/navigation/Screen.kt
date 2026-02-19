@@ -2,10 +2,12 @@ package org.julienjnnqin.luxmateapp.presentation.navigation
 
 import kotlinx.serialization.Serializable
 
+var mainRoute = arrayOf(Screen.Teachers.route, Screen.Profile.route, Screen.Profile.route)
+
 @Serializable
-sealed class Screen(val route: String) {
+sealed class Screen(val route: String, val index: Int? = null) {
     @Serializable
-    data object Onboarding : Screen("onboarding")
+    data object Onboarding : Screen("onboarding",index = 0)
 
     @Serializable
     data object Login : Screen("login")

@@ -20,7 +20,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import org.jetbrains.compose.ui.tooling.preview.Preview
+
+@Preview
+@Composable
+fun PreviewBottomNavigationBar() {
+    MaterialTheme {
+        BottomNavigationBar(
+            selectedIndex = 0,
+            onItemSelected = {}
+        )
+    }
+}
 
 @Composable
 fun BottomNavigationBar(
@@ -32,7 +46,8 @@ fun BottomNavigationBar(
         modifier = modifier
             .fillMaxWidth()
             .height(80.dp)
-            .background(MaterialTheme.colorScheme.background),
+            .background(Color.Transparent)
+            .padding(bottom = 16.dp),
         contentAlignment = Alignment.BottomCenter
     ) {
         Row(
