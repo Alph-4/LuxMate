@@ -1,0 +1,40 @@
+package org.julienjnnqin.luxmateapp.domain.entity
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class User(
+    val id: String,
+    val name: String,
+    val email: String,
+    val avatar: String? = null
+)
+
+@Serializable
+data class Teacher(
+    val id: String,
+    val name: String,
+    val subject: String,
+    val level: String,
+    val description: String,
+    val avatar: String,
+    val isOnline: Boolean = false,
+    val rating: Float = 0f
+)
+
+@Serializable
+data class OnboardingState(
+    val isCompleted: Boolean = false,
+    val currentPage: Int = 0
+)
+
+@Serializable
+data class ChatHistory(
+    val id: String,
+    val teacherId: String,
+    val teacherName: String,
+    val subject: String,
+    val date: String,
+    val lastMessage: String
+)
+
