@@ -1,7 +1,5 @@
 package org.julienjnnqin.luxmateapp.presentation
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,103 +7,66 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.julienjnnqin.luxmateapp.domain.usecase.CheckOnboardingCompletedUseCase
-import org.julienjnnqin.luxmateapp.domain.usecase.GetCurrentUserUseCase
 import org.julienjnnqin.luxmateapp.presentation.navigation.Screen
 
+/**
+ * État de l'application
+ * Détermine la route de démarrage basée sur l'état d'authentification et d'onboarding
+ * Compatible avec Jetpack Navigation Compose
+ */
 data class AppState(
-    val isOnboardingCompleted: Boolean = false,
-    val isAuthenticated: Boolean = false,
     val isLoading: Boolean = true,
-    val currentScreen: Screen = Screen.Onboarding
+    val startDestination: Screen = Screen.Onboarding
 )
 
+/**
+ * ViewModel de l'application
+ * Gère l'état global de navigation et la logique de démarrage
+ * Détermine la route initiale en fonction du statut d'onboarding et d'authentification
+ *
+ * Bonnes pratiques:
+ * - Utilise viewModelScope pour les tâches asynchrones
+ * - Expose uniquement des StateFlow (immutable de l'extérieur)
+ * - Ne gère pas la navigation directement (c'est le rôle de NavController)
+ * - Détermine juste la destination de démarrage
+ */
 class AppViewModel(
-    private val checkOnboardingCompletedUseCase: CheckOnboardingCompletedUseCase,
-    private val getCurrentUserUseCase: GetCurrentUserUseCase
+    private val checkOnboardingCompletedUseCase: CheckOnboardingCompletedUseCase
 ) : ViewModel() {
+
     private val _appState = MutableStateFlow(AppState())
     val appState: StateFlow<AppState> = _appState.asStateFlow()
 
     init {
+        loadInitialDestination()
+    }
+
+    /**
+     * Détermine la destination initiale basée sur le statut d'onboarding
+     */
+    private fun loadInitialDestination() {
         viewModelScope.launch {
-            checkOnboardingStatus()
-        }
-    }
+            try {
+                val result = checkOnboardingCompletedUseCase()
+                val startDestination = result.fold(
+                    onSuccess = { isCompleted ->
+                        if (isCompleted) Screen.Login else Screen.Onboarding
+                    },
+                    onFailure = { Screen.Onboarding }
+                )
 
-    private suspend fun checkOnboardingStatus() {
-        val result = checkOnboardingCompletedUseCase()
-        result.onSuccess { isCompleted ->
-            if (isCompleted) {
-                checkAuthStatus()
-            } else {
-                _appState.value = _appState.value.copy(
-                    isOnboardingCompleted = false,
+                _appState.value = AppState(
                     isLoading = false,
-                    currentScreen = Screen.Onboarding
+                    startDestination = startDestination
+                )
+            } catch (_: Exception) {
+                // En cas d'erreur, afficher l'onboarding par défaut
+                _appState.value = AppState(
+                    isLoading = false,
+                    startDestination = Screen.Onboarding
                 )
             }
-        }.onFailure {
-            _appState.value = _appState.value.copy(isLoading = false)
         }
-    }
-
-    private suspend fun checkAuthStatus() {
-        val result = getCurrentUserUseCase()
-        result.onSuccess { user ->
-            if (user != null) {
-                _appState.value = _appState.value.copy(
-                    isOnboardingCompleted = true,
-                    isAuthenticated = true,
-                    isLoading = false,
-                    currentScreen = Screen.Teachers
-                )
-            } else {
-                _appState.value = _appState.value.copy(
-                    isOnboardingCompleted = true,
-                    isAuthenticated = false,
-                    isLoading = false,
-                    currentScreen = Screen.Login
-                )
-            }
-        }.onFailure {
-            _appState.value = _appState.value.copy(
-                isOnboardingCompleted = true,
-                isAuthenticated = false,
-                isLoading = false,
-                currentScreen = Screen.Login
-            )
-        }
-    }
-
-    fun navigateToTeachers() {
-        _appState.value = _appState.value.copy(
-            isAuthenticated = true,
-            currentScreen = Screen.Teachers
-        )
-    }
-
-    fun navigateToLogin() {
-        _appState.value = _appState.value.copy(
-            currentScreen = Screen.Login
-        )
-    }
-
-    fun navigateToProfile() {
-        _appState.value = _appState.value.copy(
-            currentScreen = Screen.Profile
-        )
-    }
-
-    fun navigateToOnboarding() {
-        _appState.value = _appState.value.copy(
-            currentScreen = Screen.Onboarding
-        )
-    }
-
-    fun navigateToTeacherDetail(teacherId: String) {
-        _appState.value = _appState.value.copy(
-            currentScreen = Screen.TeacherDetail(teacherId)
-        )
     }
 }
 

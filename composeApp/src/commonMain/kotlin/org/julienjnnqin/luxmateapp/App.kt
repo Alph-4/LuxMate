@@ -8,26 +8,21 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import org.koin.core.context.GlobalContext
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
 import org.julienjnnqin.luxmateapp.core.theme.LuxMateAppTheme
 import org.julienjnnqin.luxmateapp.di.initializeKoin
 import org.julienjnnqin.luxmateapp.presentation.AppViewModel
-import org.julienjnnqin.luxmateapp.presentation.navigation.Screen
-import org.julienjnnqin.luxmateapp.presentation.screen.onboarding.OnboardingScreen
-import org.julienjnnqin.luxmateapp.presentation.screen.onboarding.OnboardingViewModel
-import org.julienjnnqin.luxmateapp.presentation.screen.auth.LoginScreen
-import org.julienjnnqin.luxmateapp.presentation.screen.auth.LoginViewModel
-import org.julienjnnqin.luxmateapp.presentation.screen.teachers.TeachersScreen
-import org.julienjnnqin.luxmateapp.presentation.screen.teachers.TeachersViewModel
-import org.julienjnnqin.luxmateapp.presentation.screen.teacherdetail.TeacherDetailScreen
-import org.julienjnnqin.luxmateapp.presentation.screen.profile.ProfileScreen
-import org.julienjnnqin.luxmateapp.presentation.screen.profile.ProfileViewModel
+import org.julienjnnqin.luxmateapp.presentation.navigation.NavigationHost
+import androidx.navigation.compose.rememberNavController
 
-@Composable
-inline fun <reified T : Any> rememberKoinInstance(): T {
-    return remember { GlobalContext.get().get<T>() }
-}
-
+/**
+ * Point d'entrée de l'application
+ * Initialise Koin et affiche le thème
+ * Gère l'état de chargement initial et la navigation
+ */
 @Composable
 @Preview
 fun App() {
@@ -38,80 +33,36 @@ fun App() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            AppNavigation()
+            AppContent()
         }
     }
 }
 
+/**
+ * Contenu principal de l'application
+ * Affiche le spinner de chargement ou la navigation
+ * Détermine la destination initiale basée sur l'état de l'app
+ */
 @Composable
-fun AppNavigation() {
-    val appViewModel: AppViewModel = rememberKoinInstance()
+fun AppContent() {
+    // ViewModel de l'app pour déterminer la destination initiale
+    val appViewModel: AppViewModel = koinViewModel()
     val appState = appViewModel.appState.collectAsState().value
+    val navController = rememberNavController()
 
-    when {
-        appState.isLoading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+    if (appState.isLoading) {
+        // Affiche un spinner pendant le chargement de l'état initial
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
         }
-        !appState.isOnboardingCompleted -> {
-            val onboardingViewModel: OnboardingViewModel = rememberKoinInstance()
-            OnboardingScreen(
-                viewModel = onboardingViewModel,
-                onComplete = {
-                    appViewModel.navigateToLogin()
-                }
-            )
-        }
-        appState.currentScreen == Screen.Login -> {
-            val loginViewModel: LoginViewModel = rememberKoinInstance()
-            LoginScreen(
-                viewModel = loginViewModel,
-                onLoginSuccess = {
-                    appViewModel.navigateToTeachers()
-                }
-            )
-        }
-        appState.currentScreen == Screen.Teachers -> {
-            val teachersViewModel: TeachersViewModel = rememberKoinInstance()
-            TeachersScreen(
-                viewModel = teachersViewModel,
-                onTeacherSelected = { teacherId ->
-                    appViewModel.navigateToTeacherDetail(teacherId)
-                },
-                onProfileClick = {
-                    appViewModel.navigateToProfile()
-                }
-            )
-        }
-        is Screen.TeacherDetail -> {
-            val teacherId = (appState.currentScreen as Screen.TeacherDetail).teacherId
-            val teachersViewModel: TeachersViewModel = rememberKoinInstance()
-            val teacher = teachersViewModel.uiState.collectAsState().value.teachers.find { it.id == teacherId }
-
-            if (teacher != null) {
-                TeacherDetailScreen(
-                    teacher = teacher,
-                    onBackClick = {
-                        appViewModel.navigateToTeachers()
-                    },
-                    onStartConversation = {
-                        // TODO: Navigate to chat
-                    }
-                )
-            }
-        }
-        appState.currentScreen == Screen.Profile -> {
-            val profileViewModel: ProfileViewModel = rememberKoinInstance()
-            ProfileScreen(
-                viewModel = profileViewModel,
-                onBackClick = {
-                    appViewModel.navigateToTeachers()
-                }
-            )
-        }
+    } else {
+        // Lance la navigation avec la destination initiale déterminée
+        NavigationHost(
+            navController = navController,
+            startDestination = appState.startDestination
+        )
     }
 }
