@@ -7,7 +7,7 @@ import org.julienjnnqin.luxmateapp.domain.entity.ChatHistory
 
 interface OnboardingRepository {
     suspend fun getOnboardingState(): OnboardingState
-    suspend fun setOnboardingCompleted()
+    suspend fun setOnboardingCompleted(): Result<Unit>
 }
 
 interface AuthRepository {

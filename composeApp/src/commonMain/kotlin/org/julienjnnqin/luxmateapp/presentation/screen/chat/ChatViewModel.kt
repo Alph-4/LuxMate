@@ -7,7 +7,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.julienjnnqin.luxmateapp.domain.entity.Teacher
-import org.julienjnnqin.luxmateapp.domain.usecase.GetTeacherByIdUseCase
+import kotlin.time.Clock
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 data class ChatUiState(
     val teacher: Teacher? = null,
@@ -73,9 +75,10 @@ class ChatViewModel(
         )
     }
 
+    @OptIn(ExperimentalUuidApi::class)
     fun sendMessage(content: String) {
         val newMessage = ChatMessage(
-            id = System.currentTimeMillis().toString(),
+            id = Uuid.generateV4().toString(),
             content = content,
             isFromUser = true,
             timestamp = "now"

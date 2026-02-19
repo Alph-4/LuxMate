@@ -3,21 +3,22 @@ package org.julienjnnqin.luxmateapp.presentation.navigation
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed class Screen {
+sealed class Screen(val route: String) {
     @Serializable
-    data object Onboarding : Screen()
+    data object Onboarding : Screen("onboarding")
 
     @Serializable
-    data object Login : Screen()
+    data object Login : Screen("login")
 
     @Serializable
-    data object Teachers : Screen()
+    data object Teachers : Screen("teachers")
 
     @Serializable
-    data object Profile : Screen()
+    data object Profile : Screen("profile")
 
     @Serializable
-    data class TeacherDetail(val teacherId: String) : Screen()
+    data object TeacherDetail : Screen("teacherDetail/{teacherId}") {
+        const val ARG_TEACHER_ID = "teacherId"
+        fun createRoute(teacherId: String) = "teacherDetail/$teacherId"
+    }
 }
-
-
