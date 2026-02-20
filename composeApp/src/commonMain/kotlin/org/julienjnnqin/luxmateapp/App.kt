@@ -35,7 +35,7 @@ import org.julienjnnqin.luxmateapp.presentation.navigation.mainRoute
 @Composable
 @Preview
 fun App() {
-    initializeKoin()
+    //initializeKoin()
 
     LuxMateAppTheme {
         Surface(

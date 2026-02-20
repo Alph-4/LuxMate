@@ -1,6 +1,7 @@
 package org.julienjnnqin.luxmateapp.presentation.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -22,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -37,6 +39,22 @@ fun PreviewBottomNavigationBar() {
     }
 }
 
+@Preview
+@Composable
+fun PreviewTopAppBarTeachers() {
+    MaterialTheme {
+        TopAppBarTeachers()
+    }
+}
+
+@Preview
+@Composable
+fun PreviewTopAppBarProfile() {
+    MaterialTheme {
+        TopAppBarProfile()
+    }
+}
+
 @Composable
 fun BottomNavigationBar(
     selectedIndex: Int,
@@ -47,16 +65,15 @@ fun BottomNavigationBar(
         modifier = modifier
             .fillMaxWidth()
             .height(90.dp)
-            .shadow(elevation = 2.dp, shape = CircleShape)
             .background(Color.Transparent)
-            .padding(bottom = 16.dp),
+            .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
+        ,
         contentAlignment = Alignment.BottomCenter
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(80.dp)
-                .padding(horizontal = 8.dp, vertical = 8.dp)
+                .fillMaxSize()
+                .shadow(elevation = 2.dp, shape = CircleShape)
                 .background(
                     color = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(20.dp)
@@ -94,22 +111,24 @@ fun BottomNavigationBar(
 
 @Composable
 private fun BottomNavItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     label: String,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .clip(CircleShape)
-            .clickable(onClick = onClick)
-            .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
         Box(
             modifier = Modifier
-                .size(48.dp)
+                .clip(RoundedCornerShape(size = 16.dp))
+                .clickable(onClick = onClick)
+                .border(
+                    shape = RoundedCornerShape(size = 16.dp), color = MaterialTheme.colorScheme.surface,
+                    width = 0.dp
+                )
+                .size(60.dp)
                 .background(
                     color = if (isSelected)
                         MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
@@ -119,26 +138,32 @@ private fun BottomNavItem(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                modifier = Modifier.size(24.dp),
-                tint = if (isSelected)
-                    MaterialTheme.colorScheme.primary
-                else
-                    MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+
+            ){
+                Icon(
+                    imageVector = icon,
+                    contentDescription = label,
+                    modifier = Modifier.size(24.dp),
+                    tint = if (isSelected)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                )
 
 
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = if (isSelected)
-                    MaterialTheme.colorScheme.primary
-                else
-                    MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp)
-            )
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = if (isSelected)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+
         }
     }
 }
@@ -194,7 +219,7 @@ fun TopAppBarTeachers(
                     modifier = Modifier
                         .size(10.dp)
                         .background(
-                            color = androidx.compose.ui.graphics.Color(0xFF22c55e),
+                            color = Color(0xFF22c55e),
                             shape = CircleShape
                         )
                         .align(Alignment.TopEnd)
