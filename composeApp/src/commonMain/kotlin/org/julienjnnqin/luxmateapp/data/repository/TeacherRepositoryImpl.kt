@@ -1,9 +1,12 @@
 package org.julienjnnqin.luxmateapp.data.repository
 
+import org.julienjnnqin.luxmateapp.data.remote.KtorbackendApi
 import org.julienjnnqin.luxmateapp.domain.entity.Teacher
 import org.julienjnnqin.luxmateapp.domain.repository.TeacherRepository
 
-class TeacherRepositoryImpl : TeacherRepository {
+class TeacherRepositoryImpl(
+    private val backendApi: KtorbackendApi,
+    ) : TeacherRepository {
     private val mockTeachers = listOf(
         Teacher(
             id = "teacher_001",

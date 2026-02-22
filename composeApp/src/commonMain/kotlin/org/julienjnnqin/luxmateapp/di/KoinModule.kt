@@ -1,5 +1,16 @@
 package org.julienjnnqin.luxmateapp.di
 
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.http.ContentType
+import io.ktor.http.ContentType.Application.Json
+import io.ktor.http.headers
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.serialization.json.Json
+import org.julienjnnqin.luxmateapp.data.config.JsonConfig
+import org.julienjnnqin.luxmateapp.data.remote.KtorbackendApi
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import org.koin.compose.viewmodel.dsl.viewModel
@@ -17,6 +28,7 @@ import org.julienjnnqin.luxmateapp.presentation.screen.onboarding.OnboardingView
 import org.julienjnnqin.luxmateapp.presentation.screen.auth.LoginViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.teachers.TeachersViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.profile.ProfileViewModel
+import org.koin.core.module.dsl.factoryOf
 
 /**
  * Module Koin pour l'injection de dépendances
@@ -25,11 +37,27 @@ import org.julienjnnqin.luxmateapp.presentation.screen.profile.ProfileViewModel
  * - ViewModels: viewModel() (instance unique par écran via Jetpack ViewModel)
  */
 val appModule = module {
+
+    // ===== HTTP CLIENT =====
+    single {
+        HttpClient {
+            install(ContentNegotiation) {
+                json(JsonConfig.instance, contentType = Json)
+            }
+
+        }
+    }
+
+
+    // ===== API & SERVICES =====
+    // Single pour les API et services : une seule instance partagée
+    single<KtorbackendApi> { KtorbackendApi(get()) }
+
     // ===== REPOSITORIES =====
     // Single pour les repositories : une seule instance partagée
     single<OnboardingRepository> { OnboardingRepositoryImpl() }
     single<AuthRepository> { AuthRepositoryImpl() }
-    single<TeacherRepository> { TeacherRepositoryImpl() }
+    single<TeacherRepository> { TeacherRepositoryImpl(get()) }
     single<UserRepository> { UserRepositoryImpl() }
 
     // ===== USE CASES =====
@@ -44,19 +72,29 @@ val appModule = module {
     single { GetUserProfileUseCase(get()) }
     single { GetChatHistoryUseCase(get()) }
 
-    // ===== VIEW MODELS =====
-    // viewModel() pour les ViewModels : gestion du cycle de vie par Compose
-    // Une instance par écran, détruite quand on quitte l'écran
 
-    viewModel { AppViewModel(get()) }
+}
 
-    viewModel { OnboardingViewModel(get()) }
+// ===== DOMAIN LAYER =====
 
-    viewModel { LoginViewModel(get()) }
+val domainModule = module {
+    factoryOf(::LoginUseCase)
+    factoryOf(::GetCurrentUserUseCase)
+    factoryOf(::GetCurrentUserUseCase)
+    factoryOf(::GetCurrentUserUseCase)
+    factoryOf(::GetCurrentUserUseCase)
+    factoryOf(::GetCurrentUserUseCase)
+}
 
-    viewModel { TeachersViewModel(get(), get()) }
-
-    viewModel { ProfileViewModel(get(), get()) }
+// ===== VIEW MODELS =====
+// viewModel() pour les ViewModels : gestion du cycle de vie par Compose
+// Une instance par écran, détruite quand on quitte l'écran
+val viewModelModule = module {
+    factoryOf(::AppViewModel)
+    factoryOf(::OnboardingViewModel)
+    factoryOf(::LoginViewModel)
+    factoryOf(::TeachersViewModel)
+    factoryOf(::ProfileViewModel)
 }
 
 /**
@@ -65,7 +103,7 @@ val appModule = module {
  */
 fun initializeKoin() {
     startKoin {
-        modules(appModule)
+        modules(appModule, domainModule, viewModelModule)
     }
 }
 
