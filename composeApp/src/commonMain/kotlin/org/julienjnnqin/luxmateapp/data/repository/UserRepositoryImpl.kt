@@ -1,17 +1,21 @@
 package org.julienjnnqin.luxmateapp.data.repository
 
+import org.julienjnnqin.luxmateapp.data.remote.backendApi
 import org.julienjnnqin.luxmateapp.domain.entity.User
 import org.julienjnnqin.luxmateapp.domain.entity.ChatHistory
 import org.julienjnnqin.luxmateapp.domain.repository.UserRepository
 
-class UserRepositoryImpl : UserRepository {
+class UserRepositoryImpl(
+    private val api: backendApi
+) : UserRepository {
     override suspend fun getUserProfile(): Result<User> {
         return try {
+            val resp = api.getCurrentUser()
             val user = User(
-                id = "user_001",
-                name = "John Doe",
-                email = "john.doe@university.com",
-                avatar = "https://lh3.googleusercontent.com/aida-public/AB6AXuDiZpEiT1zOZFC4-sujixHU56w6BENvi8XHTHFp9B9sSQiC0QYOV7OWb9jw_r2IH2hN2ZALYXxg82F9_dLWUh-Oo8q_SqGlT4wL-Uh07m8jOB7Af3Gcv1sxMhMAW3bBt9tiIFSM3pL2-0C_TQr6-kn4fyWdcNjRlzehwaoTLZnjCXnh7viAecOwg25O604vpvZy2r04SP373a15FLBEvnxpSPtDlEtRYIrUfm3st_RxM1x0Reb9WOG4bCSR0JQfAIK2GfhOwuw56r3x"
+                id = resp.id,
+                name = resp.email.substringBefore('@'),
+                email = resp.email,
+                avatar = null
             )
             Result.success(user)
         } catch (e: Exception) {
@@ -21,6 +25,7 @@ class UserRepositoryImpl : UserRepository {
 
     override suspend fun getChatHistory(): Result<List<ChatHistory>> {
         return try {
+            // Keep mock chat history for now
             val chatHistory = listOf(
                 ChatHistory(
                     id = "chat_001",
@@ -55,7 +60,7 @@ class UserRepositoryImpl : UserRepository {
 
     override suspend fun updateUserProfile(user: User): Result<User> {
         return try {
-            // Mock implementation
+            // TODO: call API to update profile
             Result.success(user)
         } catch (e: Exception) {
             Result.failure(e)

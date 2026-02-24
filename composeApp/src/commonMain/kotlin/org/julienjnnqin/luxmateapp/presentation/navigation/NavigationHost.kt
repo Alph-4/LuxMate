@@ -21,7 +21,13 @@ import org.julienjnnqin.luxmateapp.presentation.screen.profile.ProfileViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.teachers.TeachersScreen
 import org.julienjnnqin.luxmateapp.presentation.screen.teachers.TeachersViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.teacherdetail.TeacherDetailScreen
+import org.julienjnnqin.luxmateapp.presentation.screen.personas.PersonasScreen
+import org.julienjnnqin.luxmateapp.presentation.screen.personas.PersonasViewModel
+import org.julienjnnqin.luxmateapp.presentation.screen.personas.PersonaDetailScreen
+import org.julienjnnqin.luxmateapp.presentation.screen.chat.ChatScreen
+import org.julienjnnqin.luxmateapp.presentation.screen.chat.ChatViewModel
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 /**
  * Navigation Manager - Gère l'état de navigation pour l'app
@@ -81,6 +87,16 @@ fun NavigationHost(
             )
         }
 
+        composable(Screen.Personas.route) {
+            val viewModel: PersonasViewModel = koinViewModel()
+            PersonasScreen(
+                viewModel = viewModel,
+                onPersonaSelected = { personaId ->
+                    navController.navigate(Screen.PersonaDetail.createRoute(personaId))
+                }
+            )
+        }
+
         composable(
             route = Screen.TeacherDetail.route,
             arguments = listOf(
@@ -107,11 +123,41 @@ fun NavigationHost(
                         navController.popBackStack()
                     },
                     onStartConversation = {
-                        // TODO: Navigate to chat screen with teacherId
-                        navController.navigate(Screen.Teachers.route)
+                        // Navigate to chat screen with teacherId as personaId
+                        navController.navigate(Screen.Chat.createRoute(teacher.id))
                     }
                 )
             }
+        }
+
+        composable(
+            route = Screen.PersonaDetail.route,
+            arguments = listOf(navArgument(Screen.PersonaDetail.ARG_PERSONA_ID) { type = NavType.StringType })
+        ) { backStackEntry ->
+            val personaId = backStackEntry.arguments?.getString(Screen.PersonaDetail.ARG_PERSONA_ID) ?: ""
+            val viewModel: PersonasViewModel = koinViewModel()
+            val uiState = viewModel.uiState.collectAsState().value
+            val persona = uiState.personas.firstOrNull { it.id == personaId }
+            if (persona == null) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                PersonaDetailScreen(
+                    persona = persona,
+                    onBackClick = { navController.popBackStack() },
+                    onStartConversation = { pId -> navController.navigate(Screen.Chat.createRoute(pId)) }
+                )
+            }
+        }
+
+        composable(
+            route = Screen.Chat.route,
+            arguments = listOf(navArgument(Screen.Chat.ARG_PERSONA_ID) { type = NavType.StringType })
+        ) { backStackEntry ->
+            val personaId = backStackEntry.arguments?.getString(Screen.Chat.ARG_PERSONA_ID) ?: ""
+            val viewModel: ChatViewModel = koinViewModel { parametersOf(personaId) }
+            ChatScreen(viewModel = viewModel, onBack = { navController.popBackStack() })
         }
 
         composable(Screen.Profile.route) {

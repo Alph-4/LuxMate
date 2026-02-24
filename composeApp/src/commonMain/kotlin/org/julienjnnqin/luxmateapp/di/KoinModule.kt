@@ -11,6 +11,9 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.serialization.json.Json
 import org.julienjnnqin.luxmateapp.data.config.JsonConfig
 import org.julienjnnqin.luxmateapp.data.remote.KtorbackendApi
+import org.julienjnnqin.luxmateapp.data.remote.backendApi
+import org.julienjnnqin.luxmateapp.data.auth.InMemoryTokenStore
+import org.julienjnnqin.luxmateapp.data.auth.TokenStore
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import org.koin.compose.viewmodel.dsl.viewModel
@@ -29,6 +32,7 @@ import org.julienjnnqin.luxmateapp.presentation.screen.auth.LoginViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.teachers.TeachersViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.profile.ProfileViewModel
 import org.koin.core.module.dsl.factoryOf
+import org.koin.core.parameter.parametersOf
 
 /**
  * Module Koin pour l'injection de dépendances
@@ -51,14 +55,21 @@ val appModule = module {
 
     // ===== API & SERVICES =====
     // Single pour les API et services : une seule instance partagée
-    single<KtorbackendApi> { KtorbackendApi(get()) }
+    // TokenStore (replace with secure platform implementations later)
+    single<TokenStore> { InMemoryTokenStore() }
+
+    // API client wired with TokenStore
+    single { KtorbackendApi(get(), get()) }
+    single<backendApi> { get() }
 
     // ===== REPOSITORIES =====
     // Single pour les repositories : une seule instance partagée
     single<OnboardingRepository> { OnboardingRepositoryImpl() }
-    single<AuthRepository> { AuthRepositoryImpl() }
+    single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
     single<TeacherRepository> { TeacherRepositoryImpl(get()) }
-    single<UserRepository> { UserRepositoryImpl() }
+    single<org.julienjnnqin.luxmateapp.domain.repository.ChatRepository> { org.julienjnnqin.luxmateapp.data.repository.ChatRepositoryImpl(get()) }
+    single<org.julienjnnqin.luxmateapp.domain.repository.PersonaRepository> { org.julienjnnqin.luxmateapp.data.repository.PersonaRepositoryImpl(get()) }
+    single<UserRepository> { UserRepositoryImpl(get()) }
 
     // ===== USE CASES =====
     // Single pour les use cases : injection déclarative
@@ -95,6 +106,9 @@ val viewModelModule = module {
     factoryOf(::LoginViewModel)
     factoryOf(::TeachersViewModel)
     factoryOf(::ProfileViewModel)
+    // Personas
+    factory { org.julienjnnqin.luxmateapp.presentation.screen.personas.PersonasViewModel(get()) }
+    factory { (personaId: String) -> org.julienjnnqin.luxmateapp.presentation.screen.chat.ChatViewModel(personaId, get()) }
 }
 
 /**

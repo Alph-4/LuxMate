@@ -23,4 +23,19 @@ sealed class Screen(val route: String, val index: Int? = null) {
         const val ARG_TEACHER_ID = "teacherId"
         fun createRoute(teacherId: String) = "teacherDetail/$teacherId"
     }
+
+    @Serializable
+    data object Personas : Screen("personas")
+
+    @Serializable
+    data object PersonaDetail : Screen("personaDetail/{personaId}") {
+        const val ARG_PERSONA_ID = "personaId"
+        fun createRoute(personaId: String) = "personaDetail/$personaId"
+    }
+
+    @Serializable
+    data object Chat : Screen("chat/{personaId}") {
+        const val ARG_PERSONA_ID = "personaId"
+        fun createRoute(personaId: String) = "chat/$personaId"
+    }
 }
