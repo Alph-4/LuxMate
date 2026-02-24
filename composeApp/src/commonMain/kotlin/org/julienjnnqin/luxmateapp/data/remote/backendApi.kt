@@ -34,7 +34,7 @@ interface backendApi {
 
 class KtorbackendApi(private val client: HttpClient) : backendApi {
     companion object {
-        private const val API_URL = ""
+        private const val API_URL = "https://luxmate.up.railway.app"
     }
 
     override suspend fun getPersonas(): List<Unit> {
