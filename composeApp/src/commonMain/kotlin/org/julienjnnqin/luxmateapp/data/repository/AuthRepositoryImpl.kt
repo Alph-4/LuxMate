@@ -5,21 +5,15 @@ import org.julienjnnqin.luxmateapp.data.remote.backendApi
 import org.julienjnnqin.luxmateapp.domain.entity.User
 import org.julienjnnqin.luxmateapp.domain.repository.AuthRepository
 
-class AuthRepositoryImpl(
-    private val api: backendApi,
-    private val tokenStore: TokenStore
-) : AuthRepository {
+class AuthRepositoryImpl(private val api: backendApi, private val tokenStore: TokenStore) :
+        AuthRepository {
     private var currentUser: User? = null
 
     override suspend fun login(email: String, password: String): Result<User> {
         return try {
             val tokenResponse = api.login(email, password)
             tokenStore.save(tokenResponse)
-            val user = User(
-                id = tokenResponse.userId,
-                name = "",
-                email = ""
-            )
+            val user = User(id = tokenResponse.userId, name = "", email = "")
             currentUser = user
             Result.success(user)
         } catch (e: Exception) {
@@ -41,12 +35,13 @@ class AuthRepositoryImpl(
         return try {
             // Try fetch from API to have latest profile
             val resp = api.getCurrentUser()
-            val user = User(
-                id = resp.id,
-                name = resp.email.substringBefore('@'),
-                email = resp.email,
-                avatar = null
-            )
+            val user =
+                    User(
+                            id = resp.id,
+                            name = resp.email.substringBefore('@'),
+                            email = resp.email,
+                            avatar = null
+                    )
             currentUser = user
             Result.success(user)
         } catch (e: Exception) {
@@ -55,4 +50,3 @@ class AuthRepositoryImpl(
         }
     }
 }
-

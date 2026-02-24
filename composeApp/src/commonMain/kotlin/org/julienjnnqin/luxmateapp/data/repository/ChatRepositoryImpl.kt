@@ -1,15 +1,14 @@
 package org.julienjnnqin.luxmateapp.data.repository
 
-import org.julienjnnqin.luxmateapp.data.model.ChatSession
 import org.julienjnnqin.luxmateapp.data.model.ChatMessage
+import org.julienjnnqin.luxmateapp.data.model.ChatSession
 import org.julienjnnqin.luxmateapp.data.model.SendMessageRequest
 import org.julienjnnqin.luxmateapp.data.model.SendMessageResponse
 import org.julienjnnqin.luxmateapp.data.remote.backendApi
 import org.julienjnnqin.luxmateapp.domain.repository.ChatRepository
 
-
 class ChatRepositoryImpl(
-    private val backendApi: backendApi,
+        private val backendApi: backendApi,
 ) : ChatRepository {
     // Get user sessions
     suspend fun getSessions(): List<ChatSession> {

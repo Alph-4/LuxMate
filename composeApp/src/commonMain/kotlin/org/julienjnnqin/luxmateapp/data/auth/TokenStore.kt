@@ -21,13 +21,15 @@ class InMemoryTokenStore : TokenStore {
 
     override suspend fun getRefreshToken(): String? = mutex.withLock { refresh }
 
-    override suspend fun save(tokenResponse: TokenResponse) = mutex.withLock {
-        access = tokenResponse.accessToken
-        refresh = tokenResponse.refreshToken
-    }
+    override suspend fun save(tokenResponse: TokenResponse) =
+            mutex.withLock {
+                access = tokenResponse.accessToken
+                refresh = tokenResponse.refreshToken
+            }
 
-    override suspend fun clear() = mutex.withLock {
-        access = null
-        refresh = null
-    }
+    override suspend fun clear() =
+            mutex.withLock {
+                access = null
+                refresh = null
+            }
 }

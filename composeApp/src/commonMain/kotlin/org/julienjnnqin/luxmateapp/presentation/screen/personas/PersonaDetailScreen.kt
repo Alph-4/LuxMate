@@ -10,18 +10,14 @@ import org.julienjnnqin.luxmateapp.data.model.Persona
 
 @Composable
 fun PersonaDetailScreen(
-    persona: Persona,
-    onBackClick: () -> Unit,
-    onStartConversation: (String) -> Unit
+        persona: Persona,
+        onBackClick: () -> Unit,
+        onStartConversation: (String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Text(text = persona.name)
         Text(text = persona.description ?: "")
-        Button(onClick = { onStartConversation(persona.id) }) {
-            Text("Start conversation")
-        }
-        Button(onClick = onBackClick) {
-            Text("Back")
-        }
+        Button(onClick = { onStartConversation(persona.id) }) { Text("Start conversation") }
+        Button(onClick = onBackClick) { Text("Back") }
     }
 }

@@ -6,17 +6,13 @@ var mainRoute = arrayOf(Screen.Teachers.route, Screen.Profile.route, Screen.Prof
 
 @Serializable
 sealed class Screen(val route: String, val index: Int? = null) {
-    @Serializable
-    data object Onboarding : Screen("onboarding",index = 0)
+    @Serializable data object Onboarding : Screen("onboarding", index = 0)
 
-    @Serializable
-    data object Login : Screen("login")
+    @Serializable data object Login : Screen("login")
 
-    @Serializable
-    data object Teachers : Screen("teachers")
+    @Serializable data object Teachers : Screen("teachers")
 
-    @Serializable
-    data object Profile : Screen("profile")
+    @Serializable data object Profile : Screen("profile")
 
     @Serializable
     data object TeacherDetail : Screen("teacherDetail/{teacherId}") {
@@ -24,8 +20,7 @@ sealed class Screen(val route: String, val index: Int? = null) {
         fun createRoute(teacherId: String) = "teacherDetail/$teacherId"
     }
 
-    @Serializable
-    data object Personas : Screen("personas")
+    @Serializable data object Personas : Screen("personas")
 
     @Serializable
     data object PersonaDetail : Screen("personaDetail/{personaId}") {

@@ -10,14 +10,12 @@ import org.julienjnnqin.luxmateapp.data.model.Persona
 import org.julienjnnqin.luxmateapp.domain.repository.PersonaRepository
 
 data class PersonasUiState(
-    val personas: List<Persona> = emptyList(),
-    val isLoading: Boolean = false,
-    val error: String? = null
+        val personas: List<Persona> = emptyList(),
+        val isLoading: Boolean = false,
+        val error: String? = null
 )
 
-class PersonasViewModel(
-    private val personaRepository: PersonaRepository
-) : ViewModel() {
+class PersonasViewModel(private val personaRepository: PersonaRepository) : ViewModel() {
     private val _uiState = MutableStateFlow(PersonasUiState())
     val uiState: StateFlow<PersonasUiState> = _uiState.asStateFlow()
 

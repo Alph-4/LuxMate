@@ -1,7 +1,7 @@
 package org.julienjnnqin.luxmateapp.domain.repository
 
-import org.julienjnnqin.luxmateapp.data.model.ChatSession
 import org.julienjnnqin.luxmateapp.data.model.ChatMessage
+import org.julienjnnqin.luxmateapp.data.model.ChatSession
 import org.julienjnnqin.luxmateapp.data.model.SendMessageRequest
 import org.julienjnnqin.luxmateapp.data.model.SendMessageResponse
 

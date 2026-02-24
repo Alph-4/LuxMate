@@ -11,10 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 
 @Composable
-fun ChatScreen(
-    viewModel: ChatViewModel,
-    onBack: () -> Unit
-) {
+fun ChatScreen(viewModel: ChatViewModel, onBack: () -> Unit) {
     val uiState = viewModel.uiState.collectAsState().value
 
     Column(modifier = Modifier.fillMaxSize()) {

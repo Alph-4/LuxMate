@@ -4,9 +4,9 @@ import android.content.Context
 import org.julienjnnqin.luxmateapp.data.model.TokenResponse
 
 /**
- * Simple Android TokenStore using SharedPreferences.
- * Replace with EncryptedSharedPreferences or DataStore for production.
- * Usage: provide this implementation in your Android application Koin initialization.
+ * Simple Android TokenStore using SharedPreferences. Replace with EncryptedSharedPreferences or
+ * DataStore for production. Usage: provide this implementation in your Android application Koin
+ * initialization.
  */
 class TokenStoreAndroid(context: Context) : TokenStore {
     private val prefs = context.getSharedPreferences("luxmate_tokens", Context.MODE_PRIVATE)
@@ -22,9 +22,9 @@ class TokenStoreAndroid(context: Context) : TokenStore {
 
     override suspend fun save(tokenResponse: TokenResponse) {
         prefs.edit()
-            .putString(KEY_ACCESS, tokenResponse.accessToken)
-            .putString(KEY_REFRESH, tokenResponse.refreshToken)
-            .apply()
+                .putString(KEY_ACCESS, tokenResponse.accessToken)
+                .putString(KEY_REFRESH, tokenResponse.refreshToken)
+                .apply()
     }
 
     override suspend fun clear() {

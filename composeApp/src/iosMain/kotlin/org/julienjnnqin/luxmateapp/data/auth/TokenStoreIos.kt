@@ -1,11 +1,11 @@
 package org.julienjnnqin.luxmateapp.data.auth
 
-import platform.Foundation.NSUserDefaults
 import org.julienjnnqin.luxmateapp.data.model.TokenResponse
+import platform.Foundation.NSUserDefaults
 
 /**
- * Simple iOS TokenStore using NSUserDefaults.
- * For production use, prefer storing tokens in the Keychain.
+ * Simple iOS TokenStore using NSUserDefaults. For production use, prefer storing tokens in the
+ * Keychain.
  */
 class TokenStoreIos : TokenStore {
     private val defaults = NSUserDefaults.standardUserDefaults()
