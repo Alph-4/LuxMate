@@ -7,7 +7,8 @@ data class User(
     val id: String,
     val name: String,
     val email: String,
-    val avatar: String? = null
+    val avatar: String? = null,
+    val role: Role = Role.USER
 )
 
 @Serializable
@@ -15,10 +16,10 @@ data class Teacher(
     val id: String,
     val name: String,
     val subject: String,
-    val level: String,
+    val theme: Theme,
+    val level: Level,
     val description: String,
     val avatar: String,
-    val isOnline: Boolean = false,
     val rating: Float = 0f
 )
 

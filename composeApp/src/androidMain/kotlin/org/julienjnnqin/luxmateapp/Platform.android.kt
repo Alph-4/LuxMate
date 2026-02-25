@@ -7,3 +7,10 @@ class AndroidPlatform : Platform {
 }
 
 actual fun getPlatform(): Platform = AndroidPlatform()
+
+actual val myLang:String?
+    get() = Locale.getDefault().language
+
+actual val myCountry:String?
+    get() = Locale.getDefault().country
+   
