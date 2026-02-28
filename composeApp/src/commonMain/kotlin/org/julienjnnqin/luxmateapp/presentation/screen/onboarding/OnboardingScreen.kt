@@ -13,9 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.julienjnnqin.luxmateapp.core.theme.LuxMateAppTheme
-import org.julienjnnqin.luxmateapp.core.theme.SuccessGreen
 import org.julienjnnqin.luxmateapp.presentation.components.PrimaryButton
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -186,6 +185,7 @@ private fun OnboardingPageContent(page: Int) {
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
+
             1 -> {
                 Text(
                     "Des professeurs disponibles 24h/7",
@@ -202,6 +202,7 @@ private fun OnboardingPageContent(page: Int) {
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
+
             2 -> {
                 Text(
                     "Progressez à votre rythme",

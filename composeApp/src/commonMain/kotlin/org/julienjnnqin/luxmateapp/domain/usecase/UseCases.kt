@@ -1,8 +1,7 @@
 package org.julienjnnqin.luxmateapp.domain.usecase
 
-import org.julienjnnqin.luxmateapp.domain.entity.OnboardingState
 import org.julienjnnqin.luxmateapp.domain.entity.User
-import org.julienjnnqin.luxmateapp.domain.entity.Teacher
+import org.julienjnnqin.luxmateapp.domain.entity.Persona
 import org.julienjnnqin.luxmateapp.domain.entity.ChatHistory
 import org.julienjnnqin.luxmateapp.domain.repository.OnboardingRepository
 import org.julienjnnqin.luxmateapp.domain.repository.AuthRepository
@@ -52,7 +51,7 @@ class GetCurrentUserUseCase(
 class GetAllTeachersUseCase(
     private val teacherRepository: TeacherRepository
 ) {
-    suspend operator fun invoke(): Result<List<Teacher>> {
+    suspend operator fun invoke(): Result<List<Persona>> {
         return teacherRepository.getAllTeachers()
     }
 }
@@ -60,7 +59,7 @@ class GetAllTeachersUseCase(
 class SearchTeachersUseCase(
     private val teacherRepository: TeacherRepository
 ) {
-    suspend operator fun invoke(query: String): Result<List<Teacher>> {
+    suspend operator fun invoke(query: String): Result<List<Persona>> {
         return teacherRepository.searchTeachers(query)
     }
 }

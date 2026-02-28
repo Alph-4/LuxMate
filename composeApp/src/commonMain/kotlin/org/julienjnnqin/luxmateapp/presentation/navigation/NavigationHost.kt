@@ -16,6 +16,8 @@ import org.julienjnnqin.luxmateapp.presentation.screen.auth.LoginScreen
 import org.julienjnnqin.luxmateapp.presentation.screen.auth.LoginViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.chat.ChatScreen
 import org.julienjnnqin.luxmateapp.presentation.screen.chat.ChatViewModel
+import org.julienjnnqin.luxmateapp.presentation.screen.home.HomeScreen
+import org.julienjnnqin.luxmateapp.presentation.screen.home.HomeViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.onboarding.OnboardingScreen
 import org.julienjnnqin.luxmateapp.presentation.screen.onboarding.OnboardingViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.personas.PersonaDetailScreen
@@ -26,11 +28,6 @@ import org.julienjnnqin.luxmateapp.presentation.screen.profile.ProfileViewModel
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-/** Navigation Manager - Gère l'état de navigation pour l'app Compatible Kotlin Multiplatform */
-data class NavigationState(
-    val currentScreen: Screen = Screen.Onboarding,
-    val navHistory: List<Screen> = emptyList()
-)
 
 /**
  * Configuration de la navigation avec un NavigationManager Utilise les sealed classes Serializable
@@ -63,6 +60,13 @@ fun NavigationHost(
             )
         }
 
+        composable(Screen.Home.route) {
+            val viewModel: HomeViewModel = koinViewModel()
+            HomeScreen(
+                "John  Doe",
+                viewModel = viewModel
+            )
+        }
 
         composable(Screen.Personas.route) {
             val viewModel: PersonasViewModel = koinViewModel()

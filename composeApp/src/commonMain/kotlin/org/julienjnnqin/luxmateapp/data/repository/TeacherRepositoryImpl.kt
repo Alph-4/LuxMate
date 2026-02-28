@@ -3,18 +3,18 @@ package org.julienjnnqin.luxmateapp.data.repository
 import org.julienjnnqin.luxmateapp.core.utils.TeacherLevel
 import org.julienjnnqin.luxmateapp.core.utils.TeacherTheme
 import org.julienjnnqin.luxmateapp.data.remote.BackendApi
-import org.julienjnnqin.luxmateapp.domain.entity.Teacher
+import org.julienjnnqin.luxmateapp.domain.entity.Persona
 import org.julienjnnqin.luxmateapp.domain.repository.TeacherRepository
 
 class TeacherRepositoryImpl(
     private val backendApi: BackendApi,
 ) : TeacherRepository {
-    override suspend fun getAllTeachers(): Result<List<Teacher>> {
+    override suspend fun getAllTeachers(): Result<List<Persona>> {
         return try {
             val personas = backendApi.getPersonas()
-            val teachers =
+            val Personas =
                 personas.map { p ->
-                    Teacher(
+                    Persona(
                         id = p.id,
                         name = p.name,
                         subject = p.theme,
@@ -30,17 +30,17 @@ class TeacherRepositoryImpl(
                         theme = TeacherTheme.ART
                     )
                 }
-            Result.success(teachers)
+            Result.success(Personas)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    override suspend fun getTeacherById(id: String): Result<Teacher> {
+    override suspend fun getTeacherById(id: String): Result<Persona> {
         return try {
             val persona = backendApi.getPersonaById(id)
-            val teacher =
-                Teacher(
+            val personna =
+                Persona(
                     id = persona.id,
                     name = persona.name,
                     subject = persona.theme,
@@ -57,13 +57,13 @@ class TeacherRepositoryImpl(
                     theme = TeacherTheme.ART
 
                 )
-            Result.success(teacher)
+            Result.success(personna)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    override suspend fun searchTeachers(query: String): Result<List<Teacher>> {
+    override suspend fun searchTeachers(query: String): Result<List<Persona>> {
         return try {
             val personas = backendApi.getPersonas()
             val filtered =
@@ -73,7 +73,7 @@ class TeacherRepositoryImpl(
                                 p.theme.contains(query, ignoreCase = true)
                     }
                     .map { p ->
-                        Teacher(
+                        Persona(
                             id = p.id,
                             name = p.name,
                             subject = p.theme,

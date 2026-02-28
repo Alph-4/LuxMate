@@ -2,7 +2,7 @@ package org.julienjnnqin.luxmateapp.domain.repository
 
 import org.julienjnnqin.luxmateapp.domain.entity.OnboardingState
 import org.julienjnnqin.luxmateapp.domain.entity.User
-import org.julienjnnqin.luxmateapp.domain.entity.Teacher
+import org.julienjnnqin.luxmateapp.domain.entity.Persona
 import org.julienjnnqin.luxmateapp.domain.entity.ChatHistory
 
 interface OnboardingRepository {
@@ -17,9 +17,9 @@ interface AuthRepository {
 }
 
 interface TeacherRepository {
-    suspend fun getAllTeachers(): Result<List<Teacher>>
-    suspend fun getTeacherById(id: String): Result<Teacher>
-    suspend fun searchTeachers(query: String): Result<List<Teacher>>
+    suspend fun getAllTeachers(): Result<List<Persona>>
+    suspend fun getTeacherById(id: String): Result<Persona>
+    suspend fun searchTeachers(query: String): Result<List<Persona>>
 }
 
 interface UserRepository {

@@ -1,45 +1,26 @@
 package org.julienjnnqin.luxmateapp.presentation.screen.personas
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import org.julienjnnqin.luxmateapp.core.theme.SuccessGreen
-import org.julienjnnqin.luxmateapp.domain.entity.Teacher
+import org.julienjnnqin.luxmateapp.core.utils.TeacherTheme
+import org.julienjnnqin.luxmateapp.domain.entity.Persona
 import org.julienjnnqin.luxmateapp.presentation.components.TopAppBarTeachers
 
 @Composable
@@ -75,10 +56,10 @@ fun PersonasScreen(viewModel: PersonasViewModel, onPersonaSelected: (String) -> 
                     .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val categories = listOf("Tous", "Maths", "Langues", "Histoire", "Sciences", "Arts")
+                val categories = TeacherTheme.entries.map { it.name }
                 items(categories) { category ->
                     FilterChip(
-                        selected = uiState.selectedCategory == category,
+                        selected = uiState.selectedTheme?.name == category,
                         onClick = { viewModel.setCategory(category) },
                         label = {
                             Text(
@@ -107,10 +88,10 @@ fun PersonasScreen(viewModel: PersonasViewModel, onPersonaSelected: (String) -> 
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(bottom = 32.dp)
             ) {
-                items(uiState.teachers) { teacher ->
+                items(uiState.personas) { persona ->
                     TeacherCard(
-                        teacher = teacher,
-                        onSelect = { onTeacherSelected(teacher.id) }
+                        persona = persona,
+                        onSelect = { onPersonaSelected(persona.id) }
                     )
                 }
             }
@@ -121,7 +102,7 @@ fun PersonasScreen(viewModel: PersonasViewModel, onPersonaSelected: (String) -> 
 
 @Composable
 private fun TeacherCard(
-    teacher: Teacher,
+    persona: Persona,
     onSelect: () -> Unit
 ) {
     Card(
@@ -149,8 +130,8 @@ private fun TeacherCard(
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     AsyncImage(
-                        model = teacher.avatar,
-                        contentDescription = teacher.name,
+                        model = persona.avatar,
+                        contentDescription = persona.name,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )
@@ -175,7 +156,7 @@ private fun TeacherCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            teacher.name,
+                            persona.name,
                             style = MaterialTheme.typography.titleLarge,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -186,12 +167,12 @@ private fun TeacherCard(
                         )
                     }
                     Text(
-                        "${teacher.subject} (${teacher.level})",
+                        "${persona.subject} (${persona.level})",
                         style = MaterialTheme.typography.titleSmall,
                         color = SuccessGreen
                     )
                     Text(
-                        "\"${teacher.description}\"",
+                        "\"${persona.description}\"",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,

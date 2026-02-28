@@ -6,10 +6,13 @@ enum class Role {
 }
 
 enum class TeacherTheme {
+    ALL,
     MATH, SCIENCE, HISTORY, LITERATURE, ART, MUSIC, LANGUAGE
 }
 
 enum class TeacherLevel {
     BEGINNER, INTERMEDIATE, ADVANCED
 }
+
+
 

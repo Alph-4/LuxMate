@@ -15,7 +15,7 @@ data class User(
 )
 
 @Serializable
-data class Teacher(
+data class Persona(
     val id: String,
     val name: String,
     val subject: String,

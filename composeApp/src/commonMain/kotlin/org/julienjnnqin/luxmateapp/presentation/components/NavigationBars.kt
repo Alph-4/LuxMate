@@ -7,13 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,11 +15,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
+import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Preview
@@ -64,31 +60,39 @@ fun BottomNavigationBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(90.dp)
+            .height(103.dp)
             .background(Color.Transparent)
-            .padding(bottom = 16.dp, start = 16.dp, end = 16.dp),
+            .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
+            .dropShadow(
+                shape = RoundedCornerShape(38.dp),
+                shadow = Shadow(
+                    radius = 38.dp,
+                    spread = 0.dp,
+                    color = Color(0x40000000),
+                    offset = DpOffset(x = 0.dp, 25.dp)
+                )
+            ),
         contentAlignment = Alignment.BottomCenter
     ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .shadow(elevation = 2.dp, shape = CircleShape)
                 .background(
                     color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(20.dp)
+                    shape = RoundedCornerShape(38.dp)
                 ),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
             BottomNavItem(
                 icon = Icons.Filled.Home,
-                label = "Acceuil",
+                label = "Home",
                 isSelected = selectedIndex == 0,
                 onClick = { onItemSelected(0) }
             )
             BottomNavItem(
                 icon = Icons.Filled.BarChart,
-                label = "Professeurs",
+                label = "Personas",
                 isSelected = selectedIndex == 1,
                 onClick = { onItemSelected(1) }
             )
@@ -100,7 +104,7 @@ fun BottomNavigationBar(
             )
             BottomNavItem(
                 icon = Icons.Filled.Person,
-                label = "Profil",
+                label = "Profile",
                 isSelected = selectedIndex == 3,
                 onClick = { onItemSelected(3) }
             )
@@ -127,7 +131,7 @@ private fun BottomNavItem(
                     shape = RoundedCornerShape(size = 16.dp), color = MaterialTheme.colorScheme.surface,
                     width = 0.dp
                 )
-                .size(60.dp)
+                .size(64.dp)
                 .background(
                     color = if (isSelected)
                         MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
@@ -154,7 +158,8 @@ private fun BottomNavItem(
 
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.labelMedium,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 15.sp),
                     color = if (isSelected)
                         MaterialTheme.colorScheme.primary
                     else

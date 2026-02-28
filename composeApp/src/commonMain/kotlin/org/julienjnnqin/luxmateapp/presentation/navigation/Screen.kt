@@ -2,7 +2,7 @@ package org.julienjnnqin.luxmateapp.presentation.navigation
 
 import kotlinx.serialization.Serializable
 
-var mainRoute = arrayOf(Screen.Personas.route, Screen.Profile.route, Screen.Profile.route)
+var mainRoute = arrayOf(Screen.Home.route,Screen.Personas.route, Screen.Profile.route, Screen.Profile.route)
 
 @Serializable
 sealed class Screen(val route: String) {

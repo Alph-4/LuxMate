@@ -9,14 +9,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.julienjnnqin.luxmateapp.data.model.SendMessageRequest
-import org.julienjnnqin.luxmateapp.domain.entity.Teacher
+import org.julienjnnqin.luxmateapp.domain.entity.Persona
 import org.julienjnnqin.luxmateapp.domain.repository.ChatRepository
 
 data class ChatUiState(
-        val teacher: Teacher? = null,
-        val isLoading: Boolean = true,
-        val error: String? = null,
-        val messages: List<ChatMessage> = emptyList()
+    val persona: Persona? = null,
+    val isLoading: Boolean = true,
+    val error: String? = null,
+    val messages: List<ChatMessage> = emptyList()
 )
 
 data class ChatMessage(
@@ -53,7 +53,7 @@ class ChatViewModel(private val teacherId: String, private val chatRepository: C
                         }
                 _uiState.value =
                         _uiState.value.copy(
-                                teacher = null,
+                                persona = null,
                                 isLoading = false,
                                 messages = uiMessages
                         )

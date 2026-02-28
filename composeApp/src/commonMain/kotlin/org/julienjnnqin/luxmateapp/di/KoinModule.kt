@@ -21,6 +21,7 @@ import org.julienjnnqin.luxmateapp.domain.usecase.*
 import org.julienjnnqin.luxmateapp.presentation.AppViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.auth.LoginViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.chat.ChatViewModel
+import org.julienjnnqin.luxmateapp.presentation.screen.home.HomeViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.onboarding.OnboardingViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.personas.PersonasViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.profile.ProfileViewModel
@@ -88,6 +89,8 @@ val viewModelModule = module {
     factoryOf(::PersonasViewModel)
     factoryOf(::ProfileViewModel)
     factoryOf(::PersonasViewModel)
+    factoryOf(::HomeViewModel)
+
     factory { (personaId: String) ->
         ChatViewModel(personaId, get())
     }
