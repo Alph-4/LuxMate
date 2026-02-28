@@ -1,130 +1,140 @@
 package org.julienjnnqin.luxmateapp.presentation.screen.chat
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.julienjnnqin.luxmateapp.data.model.SendMessageRequest
-import org.julienjnnqin.luxmateapp.domain.entity.Persona
 import org.julienjnnqin.luxmateapp.domain.repository.ChatRepository
+import kotlin.random.Random
 
-data class ChatUiState(
-    val persona: Persona? = null,
-    val isLoading: Boolean = true,
-    val error: String? = null,
-    val messages: List<ChatMessage> = emptyList()
+// Presentation models used by the composables
+data class Message(val id: String, val content: String, val timestamp: String, val isFromUser: Boolean)
+
+data class Conversation(
+    val id: String,
+    val title: String,
+    val lastMessage: String,
+    val lastSeen: String,
+    val unreadCount: Int = 0
 )
 
-data class ChatMessage(
-        val id: String,
-        val content: String,
-        val isFromUser: Boolean,
-        val timestamp: String
-)
+class ChatViewModel(private val personaId: String, private val chatRepository: ChatRepository) {
+    private val scopeJob = Job()
+    private val scope = CoroutineScope(scopeJob + Dispatchers.Default)
 
-class ChatViewModel(private val teacherId: String, private val chatRepository: ChatRepository) :
-        ViewModel() {
-    private val _uiState = MutableStateFlow(ChatUiState())
-    val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
+    private val _sessionsState = MutableStateFlow<List<Conversation>>(emptyList())
+    val sessionsState: StateFlow<List<Conversation>> = _sessionsState.asStateFlow()
+
+    private val _messagesState = MutableStateFlow<List<Message>>(emptyList())
+    val messagesState: StateFlow<List<Message>> = _messagesState.asStateFlow()
+
+    // typing / thinking indicator
+    private val _isThinking = MutableStateFlow(false)
+    val isThinking: StateFlow<Boolean> = _isThinking.asStateFlow()
+
+    // Current session id for open chat
+    var currentSessionId: String = ""
+        private set
 
     init {
-        loadTeacher()
+        // Load existing sessions on init
+        scope.launch { loadSessions() }
     }
 
-    private fun loadTeacher() {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+    private suspend fun loadSessions() {
+        try {
+            val sessions = chatRepository.getSessions()
+            val convs = sessions.map { s ->
+                Conversation(
+                    id = s.id,
+                    title = s.personaName,
+                    lastMessage = if (s.messageCount > 0) "${s.messageCount} messages" else "New session",
+                    lastSeen = s.createdAt,
+                    unreadCount = 0
+                )
+            }
+            _sessionsState.value = convs
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // keep empty list on error
+        }
+    }
+
+    fun openSession(sessionId: String) {
+        currentSessionId = sessionId
+        scope.launch {
             try {
-                // Create or get a session for this persona/teacher
-                val session = chatRepository.createSession(teacherId)
-                val messages = chatRepository.getMessages(session.id)
-                val uiMessages =
-                        messages.map { m ->
-                            ChatMessage(
-                                    id = m.id,
-                                    content = m.content,
-                                    isFromUser = m.role == "user",
-                                    timestamp = m.createdAt
-                            )
-                        }
-                _uiState.value =
-                        _uiState.value.copy(
-                                persona = null,
-                                isLoading = false,
-                                messages = uiMessages
-                        )
+                val messages = chatRepository.getMessages(sessionId)
+                _messagesState.value = messages.map { m ->
+                    Message(id = m.id, content = m.content, timestamp = m.createdAt, isFromUser = m.role == "user")
+                }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(isLoading = false, error = e.message)
+                e.printStackTrace()
             }
         }
     }
 
-    private fun mockMessages(): List<ChatMessage> {
-        return listOf(
-                ChatMessage(
-                        id = "1",
-                        content = "Bonjour! Je suis Pierre, votre professeur de mathématiques.",
-                        isFromUser = false,
-                        timestamp = "10:30"
-                ),
-                ChatMessage(
-                        id = "2",
-                        content = "Comment puis-je vous aider aujourd'hui?",
-                        isFromUser = false,
-                        timestamp = "10:31"
-                ),
-                ChatMessage(
-                        id = "3",
-                        content = "J'aimerais comprendre les dérivées",
-                        isFromUser = true,
-                        timestamp = "10:32"
-                ),
-                ChatMessage(
-                        id = "4",
-                        content =
-                                "Bien sûr! Une dérivée mesure le taux de changement d'une fonction.",
-                        isFromUser = false,
-                        timestamp = "10:33"
-                )
-        )
+    fun createSessionAndOpen(personaId: String = this.personaId) {
+        scope.launch {
+            try {
+                val session = chatRepository.createSession(personaId)
+                // refresh sessions list
+                loadSessions()
+                openSession(session.id)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
-    @OptIn(ExperimentalUuidApi::class)
     fun sendMessage(content: String) {
-        viewModelScope.launch {
+        if (content.isBlank()) return
+        if (currentSessionId.isBlank()) {
+            // create session first
+            createSessionAndOpen()
+            // wait shortly for session to be created and opened
+            scope.launch {
+                // naive wait — in practice you'd chain calls
+                kotlinx.coroutines.delay(500)
+                sendMessage(content)
+            }
+            return
+        }
+
+        scope.launch {
+            _isThinking.value = true
             try {
-                // Ensure session exists by creating with personaId
-                val session = chatRepository.createSession(teacherId)
-                val response = chatRepository.sendMessage(session.id, SendMessageRequest(content))
-                val assistantText =
-                        response.message ?: response.structuredResponse?.toString() ?: ""
-                val currentMessages = _uiState.value.messages.toMutableList()
-                // Add user message locally
-                currentMessages.add(
-                        ChatMessage(
-                                id = Uuid.generateV4().toString(),
-                                content = content,
-                                isFromUser = true,
-                                timestamp = "now"
-                        )
-                )
-                // Add assistant reply
-                currentMessages.add(
-                        ChatMessage(
-                                id = Uuid.generateV4().toString(),
-                                content = assistantText,
-                                isFromUser = false,
-                                timestamp = "now"
-                        )
-                )
-                _uiState.value = _uiState.value.copy(messages = currentMessages)
+                // append user message locally
+                val userMsg = Message(id = "local-${Random.nextLong(Long.MAX_VALUE)}", content = content, timestamp = "now", isFromUser = true)
+                val current = _messagesState.value.toMutableList()
+                current.add(userMsg)
+                _messagesState.value = current.toList()
+
+                val resp = chatRepository.sendMessage(currentSessionId, SendMessageRequest(content))
+
+                val assistantText = resp.message ?: resp.structuredResponse?.mainPoint ?: ""
+                if (assistantText.isNotBlank()) {
+                    val assistantMsg = Message(id = "srv-${Random.nextLong(Long.MAX_VALUE)}", content = assistantText, timestamp = "now", isFromUser = false)
+                    val updated = _messagesState.value.toMutableList()
+                    updated.add(assistantMsg)
+                    _messagesState.value = updated.toList()
+                }
+
+                // refresh sessions preview
+                loadSessions()
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message)
+                e.printStackTrace()
+            } finally {
+                _isThinking.value = false
             }
         }
+    }
+
+    fun clear() {
+        scopeJob.cancel()
     }
 }
