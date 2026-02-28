@@ -4,12 +4,11 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.json.Json
 import org.julienjnnqin.luxmateapp.data.auth.InMemoryTokenStore
 import org.julienjnnqin.luxmateapp.data.auth.TokenStore
 import org.julienjnnqin.luxmateapp.data.config.JsonConfig
 import org.julienjnnqin.luxmateapp.data.remote.KtorbackendApi
-import org.julienjnnqin.luxmateapp.data.remote.backendApi
+import org.julienjnnqin.luxmateapp.data.remote.BackendApi
 import org.julienjnnqin.luxmateapp.data.repository.AuthRepositoryImpl
 import org.julienjnnqin.luxmateapp.data.repository.OnboardingRepositoryImpl
 import org.julienjnnqin.luxmateapp.data.repository.TeacherRepositoryImpl
@@ -21,10 +20,10 @@ import org.julienjnnqin.luxmateapp.domain.repository.UserRepository
 import org.julienjnnqin.luxmateapp.domain.usecase.*
 import org.julienjnnqin.luxmateapp.presentation.AppViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.auth.LoginViewModel
+import org.julienjnnqin.luxmateapp.presentation.screen.chat.ChatViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.onboarding.OnboardingViewModel
+import org.julienjnnqin.luxmateapp.presentation.screen.personas.PersonasViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.profile.ProfileViewModel
-import org.julienjnnqin.luxmateapp.presentation.screen.teachers.TeachersViewModel
-import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 
@@ -42,12 +41,10 @@ val appModule = module {
 
     // ===== API & SERVICES =====
     // Single pour les API et services : une seule instance partagée
-    // TokenStore (replace with secure platform implementations later)
     single<TokenStore> { InMemoryTokenStore() }
 
     // API client wired with TokenStore
-    single { KtorbackendApi(get(), get()) }
-    single<backendApi> { get() }
+    single<BackendApi> { KtorbackendApi(get(), get()) }
 
     // ===== REPOSITORIES =====
     // Single pour les repositories : une seule instance partagée
@@ -62,28 +59,23 @@ val appModule = module {
     }
     single<UserRepository> { UserRepositoryImpl(get()) }
 
-    // ===== USE CASES =====
-    // Single pour les use cases : injection déclarative
-    single { CheckOnboardingCompletedUseCase(get()) }
-    single { SetOnboardingCompletedUseCase(get()) }
-    single { LoginUseCase(get()) }
-    single { LogoutUseCase(get()) }
-    single { GetCurrentUserUseCase(get()) }
-    single { GetAllTeachersUseCase(get()) }
-    single { SearchTeachersUseCase(get()) }
-    single { GetUserProfileUseCase(get()) }
-    single { GetChatHistoryUseCase(get()) }
+
 }
 
 // ===== DOMAIN LAYER =====
 
 val domainModule = module {
+    // ===== USE CASES =====
+    // factoryOf pour les use cases : une nouvelle instance à chaque injection (stateless, pas besoin de partager)
+    factoryOf(::CheckOnboardingCompletedUseCase)
+    factoryOf(::SetOnboardingCompletedUseCase)
     factoryOf(::LoginUseCase)
+    factoryOf(::LogoutUseCase)
     factoryOf(::GetCurrentUserUseCase)
-    factoryOf(::GetCurrentUserUseCase)
-    factoryOf(::GetCurrentUserUseCase)
-    factoryOf(::GetCurrentUserUseCase)
-    factoryOf(::GetCurrentUserUseCase)
+    factoryOf(::GetAllTeachersUseCase)
+    factoryOf(::SearchTeachersUseCase)
+    factoryOf(::GetUserProfileUseCase)
+    factoryOf(::GetChatHistoryUseCase)
 }
 
 // ===== VIEW MODELS =====
@@ -93,18 +85,10 @@ val viewModelModule = module {
     factoryOf(::AppViewModel)
     factoryOf(::OnboardingViewModel)
     factoryOf(::LoginViewModel)
-    factoryOf(::TeachersViewModel)
+    factoryOf(::PersonasViewModel)
     factoryOf(::ProfileViewModel)
-    // Personas
-    factory { org.julienjnnqin.luxmateapp.presentation.screen.personas.PersonasViewModel(get()) }
+    factoryOf(::PersonasViewModel)
     factory { (personaId: String) ->
-        org.julienjnnqin.luxmateapp.presentation.screen.chat.ChatViewModel(personaId, get())
+        ChatViewModel(personaId, get())
     }
-}
-
-/**
- * Initialise Koin avec le module de l'application À appeler une seule fois au démarrage de l'app
- */
-fun initializeKoin() {
-    startKoin { modules(appModule, domainModule, viewModelModule) }
 }

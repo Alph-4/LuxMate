@@ -1,33 +1,38 @@
 package org.julienjnnqin.luxmateapp.data.model
 
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class LLMResponse(
     val greeting: String,
-    val main_point: String,
+    @SerialName("main_point")
+    val mainPoint: String,
     val details: List<String>,
     val analogy: String,
-    val next_step: String
+    @SerialName("next_step")
+    val nextStep: String
 )
 
 // Pour affichage structuré dans l'UI
 data class StructuredAnswer(
     val greeting: String,
+    @SerialName("main_point")
     val mainPoint: String,
     val details: List<String>,
     val analogy: String,
+    @SerialName("next_step")
     val nextStep: String
 ) {
     companion object {
         fun fromLLMResponse(response: LLMResponse): StructuredAnswer {
             return StructuredAnswer(
                 greeting = response.greeting,
-                mainPoint = response.main_point,
+                mainPoint = response.mainPoint,
                 details = response.details,
                 analogy = response.analogy,
-                nextStep = response.next_step
+                nextStep = response.nextStep
             )
         }
     }

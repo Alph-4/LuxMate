@@ -5,11 +5,11 @@ enum class Role {
     USER, ADMIN
 }
 
-enum class Theme {
+enum class TeacherTheme {
     MATH, SCIENCE, HISTORY, LITERATURE, ART, MUSIC, LANGUAGE
 }
 
-enum class Level {
+enum class TeacherLevel {
     BEGINNER, INTERMEDIATE, ADVANCED
 }
 

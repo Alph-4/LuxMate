@@ -2,25 +2,21 @@ package org.julienjnnqin.luxmateapp.presentation.navigation
 
 import kotlinx.serialization.Serializable
 
-var mainRoute = arrayOf(Screen.Teachers.route, Screen.Profile.route, Screen.Profile.route)
+var mainRoute = arrayOf(Screen.Personas.route, Screen.Profile.route, Screen.Profile.route)
 
 @Serializable
-sealed class Screen(val route: String, val index: Int? = null) {
-    @Serializable data object Onboarding : Screen("onboarding", index = 0)
-
-    @Serializable data object Login : Screen("login")
-
-    @Serializable data object Teachers : Screen("teachers")
-
-    @Serializable data object Profile : Screen("profile")
+sealed class Screen(val route: String) {
+    @Serializable
+    data object Onboarding : Screen("onboarding")
 
     @Serializable
-    data object TeacherDetail : Screen("teacherDetail/{teacherId}") {
-        const val ARG_TEACHER_ID = "teacherId"
-        fun createRoute(teacherId: String) = "teacherDetail/$teacherId"
-    }
+    data object Login : Screen("login")
 
-    @Serializable data object Personas : Screen("personas")
+    data object Home : Screen("home")
+    data object Profile : Screen("profile")
+
+    @Serializable
+    data object Personas : Screen("personas")
 
     @Serializable
     data object PersonaDetail : Screen("personaDetail/{personaId}") {

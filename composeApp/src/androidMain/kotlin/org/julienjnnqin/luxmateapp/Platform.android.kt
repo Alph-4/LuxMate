@@ -1,6 +1,7 @@
 package org.julienjnnqin.luxmateapp
 
 import android.os.Build
+import java.util.Locale
 
 class AndroidPlatform : Platform {
     override val name: String = "Android ${Build.VERSION.SDK_INT}"
@@ -8,9 +9,9 @@ class AndroidPlatform : Platform {
 
 actual fun getPlatform(): Platform = AndroidPlatform()
 
-actual val myLang:String?
+actual val myLang: String?
     get() = Locale.getDefault().language
 
-actual val myCountry:String?
+actual val myCountry: String?
     get() = Locale.getDefault().country
    

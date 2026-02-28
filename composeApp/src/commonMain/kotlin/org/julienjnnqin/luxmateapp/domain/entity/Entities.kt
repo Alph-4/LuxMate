@@ -1,6 +1,9 @@
 package org.julienjnnqin.luxmateapp.domain.entity
 
 import kotlinx.serialization.Serializable
+import org.julienjnnqin.luxmateapp.core.utils.TeacherLevel
+import org.julienjnnqin.luxmateapp.core.utils.Role
+import org.julienjnnqin.luxmateapp.core.utils.TeacherTheme
 
 @Serializable
 data class User(
@@ -16,8 +19,8 @@ data class Teacher(
     val id: String,
     val name: String,
     val subject: String,
-    val theme: Theme,
-    val level: Level,
+    val theme: TeacherTheme,
+    val level: TeacherLevel,
     val description: String,
     val avatar: String,
     val rating: Float = 0f

@@ -7,8 +7,10 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import io.ktor.utils.io.CancellationException
 import org.julienjnnqin.luxmateapp.data.auth.TokenStore
 import org.julienjnnqin.luxmateapp.data.model.ChatMessage
@@ -21,7 +23,7 @@ import org.julienjnnqin.luxmateapp.data.model.SendMessageRequest
 import org.julienjnnqin.luxmateapp.data.model.SendMessageResponse
 import org.julienjnnqin.luxmateapp.data.model.TokenResponse
 
-interface backendApi {
+interface BackendApi {
     // AUTH
     suspend fun login(email: String, password: String): TokenResponse
     suspend fun refreshToken(refreshToken: String): TokenResponse
@@ -42,60 +44,82 @@ interface backendApi {
 }
 
 class KtorbackendApi(private val client: HttpClient, private val tokenStore: TokenStore) :
-        backendApi {
+    BackendApi {
     companion object {
         private const val API_URL = "https://luxmate.up.railway.app"
     }
 
+    private fun isSuccess(status: HttpStatusCode): Boolean = status.value in 200..299
+
     private suspend fun tryRefresh(): TokenResponse? {
-        val refresh = tokenStore.getRefreshToken() ?: return null
+        val refresh = tokenStore.getRefreshToken()
+        if (refresh.isNullOrEmpty()) {
+            println("tryRefresh: no refresh token available")
+            return null
+        }
+        println("tryRefresh: attempting refresh token")
         return try {
-            client
-                    .post("$API_URL/auth/refresh") {
-                        header("Content-Type", ContentType.Application.Json.contentType)
-                        setBody(RefreshTokenRequest(refresh))
-                        // do not attach Authorization header here
-                    }
-                    .body()
+            val response = client
+                .post("${API_URL}/auth/refresh") {
+                    header("Content-Type", ContentType.Application.Json.contentType)
+                    setBody(RefreshTokenRequest(refresh))
+                    // do not attach Authorization header here
+                }
+            val tokenResp: TokenResponse = response.body()
+            println("tryRefresh: refresh succeeded")
+            tokenResp
         } catch (e: Exception) {
+            println("tryRefresh: refresh failed: ${e.message}")
             null
         }
     }
 
     override suspend fun login(email: String, password: String): TokenResponse {
-        return client
-                .post("$API_URL/auth/login") {
-                    header("Content-Type", ContentType.Application.Json.contentType)
-                    setBody(LoginRequest(email, password))
-                }
-                .body()
+        println("login: email=$email")
+        val resp = client
+            .post("${API_URL}/auth/login") {
+                contentType(ContentType.Application.Json)
+                setBody(LoginRequest(email, password))
+            }
+        if (isSuccess(resp.status)) {
+            val body: TokenResponse = resp.body()
+            println("login: success ${resp.bodyAsText()}")
+            return body
+        } else {
+            val err = resp.bodyAsText()
+            println("login: response status=${resp.status} , body=$err")
+            throw Exception(err)
+        }
     }
 
     override suspend fun refreshToken(refreshToken: String): TokenResponse {
-        return client
-                .post("$API_URL/auth/refresh") {
-                    header("Content-Type", ContentType.Application.Json.contentType)
-                    setBody(RefreshTokenRequest(refreshToken))
-                }
-                .body()
+        println("refreshToken: manual refresh")
+        val resp = client
+            .post("${API_URL}/auth/refresh") {
+                header("Content-Type", ContentType.Application.Json.contentType)
+                setBody(RefreshTokenRequest(refreshToken))
+            }
+        val body: TokenResponse = resp.body()
+        println("refreshToken: success")
+        return body
     }
 
     override suspend fun getPersonas(): List<Persona> {
         try {
             val token = tokenStore.getAccessToken()
             val resp: HttpResponse =
-                    client.get("$API_URL/personas") {
-                        if (!token.isNullOrEmpty()) header("Authorization", "Bearer $token")
-                        this
-                    }
+                client.get("$API_URL/personas") {
+                    if (!token.isNullOrEmpty()) header("Authorization", "Bearer $token")
+                    this
+                }
             if (resp.status == HttpStatusCode.Unauthorized) {
                 val newTokens = tryRefresh() ?: return emptyList()
                 tokenStore.save(newTokens)
                 return client
-                        .get("$API_URL/personas") {
-                            header("Authorization", "Bearer ${newTokens.accessToken}")
-                        }
-                        .body()
+                    .get("$API_URL/personas") {
+                        header("Authorization", "Bearer ${newTokens.accessToken}")
+                    }
+                    .body()
             }
             return resp.body()
         } catch (e: Exception) {
@@ -109,17 +133,17 @@ class KtorbackendApi(private val client: HttpClient, private val tokenStore: Tok
         try {
             val token = tokenStore.getAccessToken()
             val resp: HttpResponse =
-                    client.get("$API_URL/personas/$personaId") {
-                        if (!token.isNullOrEmpty()) header("Authorization", "Bearer $token")
-                    }
+                client.get("$API_URL/personas/$personaId") {
+                    if (!token.isNullOrEmpty()) header("Authorization", "Bearer $token")
+                }
             if (resp.status == HttpStatusCode.Unauthorized) {
                 val newTokens = tryRefresh() ?: throw Exception("Unauthorized")
                 tokenStore.save(newTokens)
                 return client
-                        .get("$API_URL/personas/$personaId") {
-                            header("Authorization", "Bearer ${newTokens.accessToken}")
-                        }
-                        .body()
+                    .get("$API_URL/personas/$personaId") {
+                        header("Authorization", "Bearer ${newTokens.accessToken}")
+                    }
+                    .body()
             }
             return resp.body()
         } catch (e: Exception) {
@@ -133,17 +157,17 @@ class KtorbackendApi(private val client: HttpClient, private val tokenStore: Tok
         try {
             val token = tokenStore.getAccessToken()
             val resp: HttpResponse =
-                    client.get("$API_URL/chat/sessions") {
-                        if (!token.isNullOrEmpty()) header("Authorization", "Bearer $token")
-                    }
+                client.get("$API_URL/chat/sessions") {
+                    if (!token.isNullOrEmpty()) header("Authorization", "Bearer $token")
+                }
             if (resp.status == HttpStatusCode.Unauthorized) {
                 val newTokens = tryRefresh() ?: return emptyList()
                 tokenStore.save(newTokens)
                 return client
-                        .get("$API_URL/chat/sessions") {
-                            header("Authorization", "Bearer ${newTokens.accessToken}")
-                        }
-                        .body()
+                    .get("$API_URL/chat/sessions") {
+                        header("Authorization", "Bearer ${newTokens.accessToken}")
+                    }
+                    .body()
             }
             return resp.body()
         } catch (e: Exception) {
@@ -157,21 +181,21 @@ class KtorbackendApi(private val client: HttpClient, private val tokenStore: Tok
         try {
             val token = tokenStore.getAccessToken()
             val resp: HttpResponse =
-                    client.post("$API_URL/chat/sessions") {
-                        if (!token.isNullOrEmpty()) header("Authorization", "Bearer $token")
-                        header("Content-Type", ContentType.Application.Json.contentType)
-                        setBody(CreateChatSessionRequest(personaId))
-                    }
+                client.post("$API_URL/chat/sessions") {
+                    if (!token.isNullOrEmpty()) header("Authorization", "Bearer $token")
+                    header("Content-Type", ContentType.Application.Json.contentType)
+                    setBody(CreateChatSessionRequest(personaId))
+                }
             if (resp.status == HttpStatusCode.Unauthorized) {
                 val newTokens = tryRefresh() ?: throw Exception("Unauthorized")
                 tokenStore.save(newTokens)
                 return client
-                        .post("$API_URL/chat/sessions") {
-                            header("Authorization", "Bearer ${newTokens.accessToken}")
-                            header("Content-Type", ContentType.Application.Json.contentType)
-                            setBody(CreateChatSessionRequest(personaId))
-                        }
-                        .body()
+                    .post("$API_URL/chat/sessions") {
+                        header("Authorization", "Bearer ${newTokens.accessToken}")
+                        header("Content-Type", ContentType.Application.Json.contentType)
+                        setBody(CreateChatSessionRequest(personaId))
+                    }
+                    .body()
             }
             return resp.body()
         } catch (e: Exception) {
@@ -185,17 +209,17 @@ class KtorbackendApi(private val client: HttpClient, private val tokenStore: Tok
         try {
             val token = tokenStore.getAccessToken()
             val resp: HttpResponse =
-                    client.get("$API_URL/chat/sessions/$sessionId") {
-                        if (!token.isNullOrEmpty()) header("Authorization", "Bearer $token")
-                    }
+                client.get("$API_URL/chat/sessions/$sessionId") {
+                    if (!token.isNullOrEmpty()) header("Authorization", "Bearer $token")
+                }
             if (resp.status == HttpStatusCode.Unauthorized) {
                 val newTokens = tryRefresh() ?: throw Exception("Unauthorized")
                 tokenStore.save(newTokens)
                 return client
-                        .get("$API_URL/chat/sessions/$sessionId") {
-                            header("Authorization", "Bearer ${newTokens.accessToken}")
-                        }
-                        .body()
+                    .get("$API_URL/chat/sessions/$sessionId") {
+                        header("Authorization", "Bearer ${newTokens.accessToken}")
+                    }
+                    .body()
             }
             return resp.body()
         } catch (e: Exception) {
@@ -209,17 +233,17 @@ class KtorbackendApi(private val client: HttpClient, private val tokenStore: Tok
         try {
             val token = tokenStore.getAccessToken()
             val resp: HttpResponse =
-                    client.get("$API_URL/user/me") {
-                        if (!token.isNullOrEmpty()) header("Authorization", "Bearer $token")
-                    }
+                client.get("$API_URL/user/me") {
+                    if (!token.isNullOrEmpty()) header("Authorization", "Bearer $token")
+                }
             if (resp.status == HttpStatusCode.Unauthorized) {
                 val newTokens = tryRefresh() ?: throw Exception("Unauthorized")
                 tokenStore.save(newTokens)
                 return client
-                        .get("$API_URL/user/me") {
-                            header("Authorization", "Bearer ${newTokens.accessToken}")
-                        }
-                        .body()
+                    .get("$API_URL/user/me") {
+                        header("Authorization", "Bearer ${newTokens.accessToken}")
+                    }
+                    .body()
             }
             return resp.body()
         } catch (e: Exception) {
@@ -233,17 +257,17 @@ class KtorbackendApi(private val client: HttpClient, private val tokenStore: Tok
         try {
             val token = tokenStore.getAccessToken()
             val resp: HttpResponse =
-                    client.get("$API_URL/chat/sessions/$sessionId/messages") {
-                        if (!token.isNullOrEmpty()) header("Authorization", "Bearer $token")
-                    }
+                client.get("$API_URL/chat/sessions/$sessionId/messages") {
+                    if (!token.isNullOrEmpty()) header("Authorization", "Bearer $token")
+                }
             if (resp.status == HttpStatusCode.Unauthorized) {
                 val newTokens = tryRefresh() ?: return emptyList()
                 tokenStore.save(newTokens)
                 return client
-                        .get("$API_URL/chat/sessions/$sessionId/messages") {
-                            header("Authorization", "Bearer ${newTokens.accessToken}")
-                        }
-                        .body()
+                    .get("$API_URL/chat/sessions/$sessionId/messages") {
+                        header("Authorization", "Bearer ${newTokens.accessToken}")
+                    }
+                    .body()
             }
             return resp.body()
         } catch (e: Exception) {
@@ -254,27 +278,27 @@ class KtorbackendApi(private val client: HttpClient, private val tokenStore: Tok
     }
 
     override suspend fun sendMessage(
-            sessionId: String,
-            request: SendMessageRequest
+        sessionId: String,
+        request: SendMessageRequest
     ): SendMessageResponse {
         try {
             val token = tokenStore.getAccessToken()
             val resp: HttpResponse =
-                    client.post("$API_URL/chat/sessions/$sessionId/messages") {
-                        if (!token.isNullOrEmpty()) header("Authorization", "Bearer $token")
-                        header("Content-Type", ContentType.Application.Json.contentType)
-                        setBody(request)
-                    }
+                client.post("$API_URL/chat/sessions/$sessionId/messages") {
+                    if (!token.isNullOrEmpty()) header("Authorization", "Bearer $token")
+                    header("Content-Type", ContentType.Application.Json.contentType)
+                    setBody(request)
+                }
             if (resp.status == HttpStatusCode.Unauthorized) {
                 val newTokens = tryRefresh() ?: throw Exception("Unauthorized")
                 tokenStore.save(newTokens)
                 return client
-                        .post("$API_URL/chat/sessions/$sessionId/messages") {
-                            header("Authorization", "Bearer ${newTokens.accessToken}")
-                            header("Content-Type", ContentType.Application.Json.contentType)
-                            setBody(request)
-                        }
-                        .body()
+                    .post("$API_URL/chat/sessions/$sessionId/messages") {
+                        header("Authorization", "Bearer ${newTokens.accessToken}")
+                        header("Content-Type", ContentType.Application.Json.contentType)
+                        setBody(request)
+                    }
+                    .body()
             }
             return resp.body()
         } catch (e: Exception) {

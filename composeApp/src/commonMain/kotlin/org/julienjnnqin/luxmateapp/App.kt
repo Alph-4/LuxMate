@@ -19,7 +19,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import org.julienjnnqin.luxmateapp.core.theme.LuxMateAppTheme
-import org.julienjnnqin.luxmateapp.di.initializeKoin
 import org.julienjnnqin.luxmateapp.presentation.AppViewModel
 import org.julienjnnqin.luxmateapp.presentation.navigation.NavigationHost
 import androidx.navigation.compose.rememberNavController
@@ -76,23 +75,25 @@ fun AppContent() {
     } else {
         // Lance la navigation avec la destination initiale déterminée
 
-        Scaffold (
+        Scaffold(
             bottomBar = {
-                if(currentRoute in mainRoute) {
+                if (currentRoute in mainRoute) {
                     BottomNavigationBar(
                         selectedIndex = when (currentRoute) {
-                            Screen.Teachers.route -> 0
-                            Screen.Profile.route -> 1
+                            Screen.Personas.route -> 0
+                            Screen.Profile.route -> 3
                             else -> 0
                         },
                         onItemSelected = {
                             when (it) {
-                                0 -> navController.navigate(Screen.Teachers.route)
-                                1 -> navController.navigate(Screen.Profile.route)
-                                2 -> navController.navigate(Screen.Profile.route)
+                                0 -> navController.navigate(Screen.Home.route)
+                                1 -> navController.navigate(Screen.Personas.route)
+                                2 -> navController.navigate(Screen.Chat.route)
+                                3 -> navController.navigate(Screen.Profile.route)
                             }
                         },
-                    )}
+                    )
+                }
             }
         ) {
 

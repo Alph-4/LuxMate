@@ -66,8 +66,7 @@ fun BottomNavigationBar(
             .fillMaxWidth()
             .height(90.dp)
             .background(Color.Transparent)
-            .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
-        ,
+            .padding(bottom = 16.dp, start = 16.dp, end = 16.dp),
         contentAlignment = Alignment.BottomCenter
     ) {
         Row(
@@ -83,19 +82,19 @@ fun BottomNavigationBar(
         ) {
             BottomNavItem(
                 icon = Icons.Filled.Home,
-                label = "Accueil",
+                label = "Acceuil",
                 isSelected = selectedIndex == 0,
                 onClick = { onItemSelected(0) }
             )
             BottomNavItem(
                 icon = Icons.Filled.BarChart,
-                label = "Stats",
+                label = "Professeurs",
                 isSelected = selectedIndex == 1,
                 onClick = { onItemSelected(1) }
             )
             BottomNavItem(
                 icon = Icons.Filled.School,
-                label = "Cours",
+                label = "Chat",
                 isSelected = selectedIndex == 2,
                 onClick = { onItemSelected(2) }
             )
@@ -139,9 +138,9 @@ private fun BottomNavItem(
             contentAlignment = Alignment.Center
         ) {
             Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.CenterHorizontally,
 
-            ){
+                ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = label,
