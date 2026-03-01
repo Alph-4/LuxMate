@@ -3,8 +3,6 @@ package org.julienjnnqin.luxmateapp.data.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.julienjnnqin.luxmateapp.presentation.screen.chat.ChatMessage
-import kotlin.time.Clock
 
 @Serializable
 data class ChatSession(

@@ -117,7 +117,8 @@ fun NavigationHost(
                 )
         ) { backStackEntry ->
             val personaId = backStackEntry.arguments?.getString(Screen.Chat.ARG_PERSONA_ID) ?: ""
-            val viewModel: ChatViewModel = koinViewModel { parametersOf(personaId) }
+            // Explicitly pass <ChatViewModel> here:
+            val viewModel = koinViewModel<ChatViewModel> { parametersOf(personaId) }
             ChatScreen(viewModel = viewModel, onBack = { navController.popBackStack() })
         }
 

@@ -1,5 +1,6 @@
 package org.julienjnnqin.luxmateapp.presentation.screen.chat
 
+import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -22,7 +23,7 @@ data class Conversation(
     val unreadCount: Int = 0
 )
 
-class ChatViewModel(private val personaId: String, private val chatRepository: ChatRepository) {
+class ChatViewModel(private val personaId: String, private val chatRepository: ChatRepository) : ViewModel() {
     private val scopeJob = Job()
     private val scope = CoroutineScope(scopeJob + Dispatchers.Default)
 
@@ -109,7 +110,12 @@ class ChatViewModel(private val personaId: String, private val chatRepository: C
             _isThinking.value = true
             try {
                 // append user message locally
-                val userMsg = Message(id = "local-${Random.nextLong(Long.MAX_VALUE)}", content = content, timestamp = "now", isFromUser = true)
+                val userMsg = Message(
+                    id = "local-${Random.nextLong(Long.MAX_VALUE)}",
+                    content = content,
+                    timestamp = "now",
+                    isFromUser = true
+                )
                 val current = _messagesState.value.toMutableList()
                 current.add(userMsg)
                 _messagesState.value = current.toList()
@@ -118,7 +124,12 @@ class ChatViewModel(private val personaId: String, private val chatRepository: C
 
                 val assistantText = resp.message ?: resp.structuredResponse?.mainPoint ?: ""
                 if (assistantText.isNotBlank()) {
-                    val assistantMsg = Message(id = "srv-${Random.nextLong(Long.MAX_VALUE)}", content = assistantText, timestamp = "now", isFromUser = false)
+                    val assistantMsg = Message(
+                        id = "srv-${Random.nextLong(Long.MAX_VALUE)}",
+                        content = assistantText,
+                        timestamp = "now",
+                        isFromUser = false
+                    )
                     val updated = _messagesState.value.toMutableList()
                     updated.add(assistantMsg)
                     _messagesState.value = updated.toList()

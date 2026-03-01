@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -13,12 +14,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.julienjnnqin.luxmateapp.core.theme.SuccessGreen
-import org.julienjnnqin.luxmateapp.presentation.components.PrimaryButton
 
 @Composable
 fun LoginScreen(
@@ -26,6 +28,9 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    val emailFocusRequester = remember { FocusRequester() }
+    val passwordFocusRequester = remember { FocusRequester() }
 
     LaunchedEffect(uiState.user) {
         if (uiState.user != null) {
@@ -102,11 +107,18 @@ fun LoginScreen(
                     value = uiState.email,
                     onValueChange = { viewModel.setEmail(it) },
                     label = { Text("Email") },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(emailFocusRequester),
                     leadingIcon = {
                         Icon(Icons.Filled.Email, contentDescription = null)
                     },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = androidx.compose.ui.text.input.ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(onNext = { passwordFocusRequester.requestFocus() }),
+
                     shape = RoundedCornerShape(12.dp),
                     enabled = !uiState.isLoading
                 )
@@ -116,7 +128,9 @@ fun LoginScreen(
                     value = uiState.password,
                     onValueChange = { viewModel.setPassword(it) },
                     label = { Text("Mot de passe") },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(passwordFocusRequester),
                     leadingIcon = {
                         Icon(Icons.Filled.Lock, contentDescription = null)
                     },
