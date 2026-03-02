@@ -71,7 +71,6 @@ fun AppContent() {
             CircularProgressIndicator()
         }
     } else {
-        // Lance la navigation avec la destination initiale déterminée
 
         Scaffold(
             modifier = Modifier
@@ -81,7 +80,7 @@ fun AppContent() {
                 if (currentRoute in mainRoute) {
                     BottomNavigationBar(
                         selectedIndex = when (currentRoute) {
-                            Screen.Personas.route -> 0
+                            Screen.Home.route -> 0
                             Screen.Personas.route -> 1
                             Screen.Chat.route -> 2
                             Screen.Profile.route -> 3
