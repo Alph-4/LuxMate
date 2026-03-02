@@ -87,8 +87,7 @@ fun NavigationHost(
                     }
                 )
         ) { backStackEntry ->
-            val personaId =
-                backStackEntry.arguments?.getString(Screen.PersonaDetail.ARG_PERSONA_ID) ?: ""
+            val personaId = backStackEntry.arguments?.get(Screen.PersonaDetail.ARG_PERSONA_ID) as? String ?: ""
             val viewModel: PersonasViewModel = koinViewModel()
             val uiState = viewModel.uiState.collectAsState().value
             val persona = uiState.personas.firstOrNull { it.id == personaId }
@@ -116,8 +115,7 @@ fun NavigationHost(
                     }
                 )
         ) { backStackEntry ->
-            val personaId = backStackEntry.arguments?.getString(Screen.Chat.ARG_PERSONA_ID) ?: ""
-            // Explicitly pass <ChatViewModel> here:
+            val personaId = backStackEntry.arguments?.get(Screen.Chat.ARG_PERSONA_ID) as? String ?: ""
             val viewModel = koinViewModel<ChatViewModel> { parametersOf(personaId) }
             ChatScreen(viewModel = viewModel, onBack = { navController.popBackStack() })
         }
