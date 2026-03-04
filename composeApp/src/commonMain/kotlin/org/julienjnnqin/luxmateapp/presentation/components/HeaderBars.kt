@@ -38,10 +38,10 @@ fun HeaderBar(
 ) {
     Row(
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxWidth(0.94f)
             .height(64.dp)
             .background(
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
+                color = Color.White,
                 shape = RoundedCornerShape(24.dp)
             )
             .clip(RoundedCornerShape(24.dp))
