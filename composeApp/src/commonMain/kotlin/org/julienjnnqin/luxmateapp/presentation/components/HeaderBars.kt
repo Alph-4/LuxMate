@@ -6,9 +6,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +40,10 @@ fun HeaderBar(
         modifier = modifier
             .fillMaxWidth()
             .height(64.dp)
+            .background(
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
+                shape = RoundedCornerShape(24.dp)
+            )
             .clip(RoundedCornerShape(24.dp))
             .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -62,12 +66,7 @@ fun TextNavItem(title: String) {
             ),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            imageVector = Icons.Filled.Person,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onPrimary,
-            modifier = Modifier.size(24.dp)
-        )
+        Text(title, color = MaterialTheme.colorScheme.onPrimary)
     }
 }
 
