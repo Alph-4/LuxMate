@@ -1,12 +1,9 @@
 package org.julienjnnqin.luxmateapp.domain.usecase
 
-import org.julienjnnqin.luxmateapp.domain.entity.User
-import org.julienjnnqin.luxmateapp.domain.entity.Persona
 import org.julienjnnqin.luxmateapp.domain.entity.ChatHistory
-import org.julienjnnqin.luxmateapp.domain.repository.OnboardingRepository
-import org.julienjnnqin.luxmateapp.domain.repository.AuthRepository
-import org.julienjnnqin.luxmateapp.domain.repository.TeacherRepository
-import org.julienjnnqin.luxmateapp.domain.repository.UserRepository
+import org.julienjnnqin.luxmateapp.domain.entity.Persona
+import org.julienjnnqin.luxmateapp.domain.entity.User
+import org.julienjnnqin.luxmateapp.domain.repository.*
 
 class CheckOnboardingCompletedUseCase(
     private val onboardingRepository: OnboardingRepository
@@ -37,6 +34,13 @@ class LogoutUseCase(
 ) {
     suspend operator fun invoke(): Result<Unit> {
         return authRepository.logout()
+    }
+}
+
+class IsUserLoggedInUseCase(private val tokenStore: SettingsRepository) {
+    suspend operator fun invoke(): Boolean {
+        val token = tokenStore.getAccessToken()
+        return !token.isNullOrBlank()
     }
 }
 

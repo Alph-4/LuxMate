@@ -47,7 +47,8 @@ fun HomeScreen(
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(horizontal = 20.dp)
+                    .padding(horizontal = 20.dp),
+                contentPadding = PaddingValues(bottom = 50.dp)
             ) {
                 item { Spacer(modifier = Modifier.height(24.dp)) }
 

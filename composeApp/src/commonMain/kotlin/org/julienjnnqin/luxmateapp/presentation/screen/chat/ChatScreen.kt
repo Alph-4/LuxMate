@@ -2,17 +2,7 @@ package org.julienjnnqin.luxmateapp.presentation.screen.chat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -20,22 +10,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -75,10 +54,22 @@ fun ChatScreen(viewModel: ChatViewModel, onBack: () -> Unit) {
 fun ConversationsScreen(viewModel: ChatViewModel, onOpenConversation: (String) -> Unit) {
     val uiState by viewModel.sessionsState.collectAsState()
 
-    Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFFF6F7FB)) {
-        Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
+    Surface(
+        modifier = Modifier
+            .fillMaxSize(), color = Color(0xFFF6F7FB)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .padding(12.dp)
+        ) {
             // Header
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 Column {
                     Text(text = "Messages", fontSize = 20.sp, color = Color(0xFF0F1724))
                     Text(text = "Recent conversations", fontSize = 12.sp, color = Color(0xFF6B7280))
@@ -88,13 +79,18 @@ fun ConversationsScreen(viewModel: ChatViewModel, onOpenConversation: (String) -
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(uiState) { conv ->
-                    ConversationRow(conversation = conv, onClick = {
-                        onOpenConversation(conv.id)
-                        viewModel.openSession(conv.id)
-                    })
+            if (uiState.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = "No conversations yet. Start a new chat!", color = Color(0xFF9CA3AF))
+                }
+            } else {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(uiState) { conv ->
+                        ConversationRow(conversation = conv, onClick = {
+                            onOpenConversation(conv.id)
+                            viewModel.openSession(conv.id)
+                        })
+                    }
                 }
             }
         }
@@ -103,14 +99,18 @@ fun ConversationsScreen(viewModel: ChatViewModel, onOpenConversation: (String) -
 
 @Composable
 private fun ConversationRow(conversation: Conversation, onClick: () -> Unit) {
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .clickable { onClick() }
-        .background(Color.Transparent)
-        .padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .background(Color.Transparent)
+            .padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
 
         // Avatar
-        Box(modifier = Modifier.size(52.dp).clip(CircleShape).background(Color(0xFFEFF6FF)), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier.size(52.dp).clip(CircleShape).background(Color(0xFFEFF6FF)),
+            contentAlignment = Alignment.Center
+        ) {
             // Placeholder initial
             Text(text = conversation.title.take(1), fontSize = 20.sp, color = Color(0xFF2563EB))
         }
@@ -124,13 +124,21 @@ private fun ConversationRow(conversation: Conversation, onClick: () -> Unit) {
             }
             Spacer(modifier = Modifier.height(6.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = conversation.lastMessage, fontSize = 14.sp, color = Color(0xFF6B7280), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = conversation.lastMessage,
+                    fontSize = 14.sp,
+                    color = Color(0xFF6B7280),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
                 Spacer(modifier = Modifier.weight(1f))
                 if (conversation.unreadCount > 0) {
-                    Box(modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF2563EB))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFF2563EB))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
                         Text(text = conversation.unreadCount.toString(), color = Color.White, fontSize = 12.sp)
                     }
                 }
@@ -157,9 +165,15 @@ fun ChatDetailScreen(viewModel: ChatViewModel, conversationId: String, onBack: (
         Column(modifier = Modifier.fillMaxWidth()) {
             // Header
             Row(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null, modifier = Modifier.clickable { onBack() })
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = null,
+                    modifier = Modifier.clickable { onBack() })
                 Spacer(modifier = Modifier.width(10.dp))
-                Box(modifier = Modifier.size(44.dp).clip(CircleShape).background(Color(0xFFEFF6FF)), contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier.size(44.dp).clip(CircleShape).background(Color(0xFFEFF6FF)),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(text = viewModel.currentSessionId.take(1), color = Color(0xFF2563EB))
                 }
                 Spacer(modifier = Modifier.width(8.dp))
@@ -172,7 +186,11 @@ fun ChatDetailScreen(viewModel: ChatViewModel, conversationId: String, onBack: (
             Spacer(modifier = Modifier.height(6.dp))
 
             // Messages list
-            LazyColumn(state = listState, modifier = Modifier.fillMaxWidth().weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 items(uiState) { msg ->
                     if (msg.isFromUser) {
                         OutgoingBubble(msg.content)
@@ -184,7 +202,10 @@ fun ChatDetailScreen(viewModel: ChatViewModel, conversationId: String, onBack: (
                 if (isThinking) {
                     item {
                         // simple typing indicator
-                        Row(modifier = Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.Start) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(12.dp),
+                            horizontalArrangement = Arrangement.Start
+                        ) {
                             Spacer(modifier = Modifier.width(64.dp))
                             Text(text = "Pierre is thinking...", fontSize = 12.sp, color = Color(0xFF9CA3AF))
                         }
@@ -194,9 +215,21 @@ fun ChatDetailScreen(viewModel: ChatViewModel, conversationId: String, onBack: (
         }
 
         // Input Bar
-        Row(modifier = Modifier.fillMaxWidth().background(Color(0xFFF3F4F6)).padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { /* attach */ }) { Icon(imageVector = Icons.Filled.AttachFile, contentDescription = null) }
-            TextField(value = input, onValueChange = { input = it }, modifier = Modifier.weight(1f), placeholder = { Text("Ask a question...") })
+        Row(
+            modifier = Modifier.fillMaxWidth().background(Color(0xFFF3F4F6)).padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = { /* attach */ }) {
+                Icon(
+                    imageVector = Icons.Filled.AttachFile,
+                    contentDescription = null
+                )
+            }
+            TextField(
+                value = input,
+                onValueChange = { input = it },
+                modifier = Modifier.weight(1f),
+                placeholder = { Text("Ask a question...") })
             Spacer(modifier = Modifier.width(8.dp))
             if (input.isBlank()) {
                 IconButton(onClick = { /* mic */ }) { Icon(imageVector = Icons.Filled.Mic, contentDescription = null) }
@@ -219,14 +252,19 @@ fun ChatDetailScreen(viewModel: ChatViewModel, conversationId: String, onBack: (
 @Composable
 private fun IncomingBubble(text: String) {
     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp), verticalAlignment = Alignment.Top) {
-        Box(modifier = Modifier.size(36.dp).clip(CircleShape).background(Color(0xFFF3F4F6)), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier.size(36.dp).clip(CircleShape).background(Color(0xFFF3F4F6)),
+            contentAlignment = Alignment.Center
+        ) {
             Icon(imageVector = Icons.Filled.Mic, contentDescription = null) // just placeholder icon
         }
         Spacer(modifier = Modifier.width(8.dp))
         Column {
-            Box(modifier = Modifier
-                .background(Color.White, RoundedCornerShape(12.dp))
-                .padding(12.dp)) {
+            Box(
+                modifier = Modifier
+                    .background(Color.White, RoundedCornerShape(12.dp))
+                    .padding(12.dp)
+            ) {
                 Text(text = text, color = Color(0xFF0F1724))
             }
             Spacer(modifier = Modifier.height(4.dp))
@@ -239,9 +277,11 @@ private fun IncomingBubble(text: String) {
 private fun OutgoingBubble(text: String) {
     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp), horizontalArrangement = Arrangement.End) {
         Column(horizontalAlignment = Alignment.End) {
-            Box(modifier = Modifier
-                .background(Color(0xFF2563EB), RoundedCornerShape(12.dp))
-                .padding(12.dp)) {
+            Box(
+                modifier = Modifier
+                    .background(Color(0xFF2563EB), RoundedCornerShape(12.dp))
+                    .padding(12.dp)
+            ) {
                 Text(text = text, color = Color.White)
             }
             Spacer(modifier = Modifier.height(4.dp))

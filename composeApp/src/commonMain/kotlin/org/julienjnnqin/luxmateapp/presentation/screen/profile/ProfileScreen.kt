@@ -7,12 +7,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import org.julienjnnqin.luxmateapp.core.theme.PrimaryLight
 import org.julienjnnqin.luxmateapp.domain.entity.User
+import org.julienjnnqin.luxmateapp.presentation.components.HeaderBar
 import org.julienjnnqin.luxmateapp.presentation.components.TopAppBarProfile
 
 @Composable
@@ -34,10 +36,17 @@ fun ProfileScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.statusBars)
             .background(MaterialTheme.colorScheme.background)
     ) {
         // Header avec TopAppBar
         TopAppBarProfile(onBackClick = onBackClick)
+        HeaderBar(
+            trailingBtn = true,
+            trailingBtnAction = onBackClick,
+            title = "Person Profile",
+            leadingBtn = false,
+        )
 
         if (uiState.isLoading) {
             Box(

@@ -88,7 +88,7 @@ fun PersonasScreen(viewModel: PersonasViewModel, onPersonaSelected: (String) -> 
                     .fillMaxSize()
                     .padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(bottom = 100.dp)
+                contentPadding = PaddingValues(bottom = 120.dp)
             ) {
                 items(uiState.personas) { persona ->
                     TeacherCard(

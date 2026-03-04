@@ -1,22 +1,21 @@
 package org.julienjnnqin.luxmateapp.di
 
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.http.ContentType.Application.Json
-import io.ktor.serialization.kotlinx.json.json
-import org.julienjnnqin.luxmateapp.data.auth.InMemoryTokenStore
-import org.julienjnnqin.luxmateapp.data.auth.TokenStore
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.auth.*
+import io.ktor.client.plugins.auth.providers.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import org.julienjnnqin.luxmateapp.data.config.JsonConfig
-import org.julienjnnqin.luxmateapp.data.remote.KtorbackendApi
+import org.julienjnnqin.luxmateapp.data.local.SettingsService
+import org.julienjnnqin.luxmateapp.data.model.RefreshTokenRequest
+import org.julienjnnqin.luxmateapp.data.model.TokenResponse
 import org.julienjnnqin.luxmateapp.data.remote.BackendApi
-import org.julienjnnqin.luxmateapp.data.repository.AuthRepositoryImpl
-import org.julienjnnqin.luxmateapp.data.repository.OnboardingRepositoryImpl
-import org.julienjnnqin.luxmateapp.data.repository.TeacherRepositoryImpl
-import org.julienjnnqin.luxmateapp.data.repository.UserRepositoryImpl
-import org.julienjnnqin.luxmateapp.domain.repository.AuthRepository
-import org.julienjnnqin.luxmateapp.domain.repository.OnboardingRepository
-import org.julienjnnqin.luxmateapp.domain.repository.TeacherRepository
-import org.julienjnnqin.luxmateapp.domain.repository.UserRepository
+import org.julienjnnqin.luxmateapp.data.remote.KtorbackendApi
+import org.julienjnnqin.luxmateapp.data.repository.*
+import org.julienjnnqin.luxmateapp.domain.repository.*
 import org.julienjnnqin.luxmateapp.domain.usecase.*
 import org.julienjnnqin.luxmateapp.presentation.AppViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.auth.LoginViewModel
@@ -35,32 +34,73 @@ import org.koin.dsl.module
  */
 val appModule = module {
 
-    // ===== HTTP CLIENT =====
+    // ===== HTTP CLIENT (UNIFIÉ) =====
     single {
-        HttpClient { install(ContentNegotiation) { json(JsonConfig.instance, contentType = Json) } }
+        HttpClient {
+            // 1. Gestion du JSON
+            install(ContentNegotiation) {
+                json(JsonConfig.instance)
+            }
+
+            // 2. Gestion automatique des Tokens (le fameux "intercepteur")
+            install(Auth) {
+                bearer {
+                    loadTokens {
+                        val settings = get<SettingsService>()
+                        val access = settings.getAccessToken()
+                        val refresh = settings.getRefreshToken()
+
+                        if (access != null && refresh != null) {
+                            BearerTokens(access, refresh)
+                        } else null
+                    }
+
+                    refreshTokens {
+                        val settings = get<SettingsService>()
+                        try {
+                            val oldRefresh = settings.getRefreshToken() ?: return@refreshTokens null
+
+                            // On utilise un client temporaire ou on fait l'appel
+                            // sans repasser par le plugin Auth pour éviter une boucle
+                            val response = client.post("https://luxmate.up.railway.app/auth/refresh") {
+                                contentType(ContentType.Application.Json)
+                                setBody(RefreshTokenRequest(oldRefresh))
+                                markAsRefreshTokenRequest() // Important pour Ktor
+                            }.body<TokenResponse>()
+
+                            settings.saveUserToken(response)
+                            BearerTokens(response.accessToken, response.refreshToken)
+                        } catch (e: Exception) {
+                            settings.cleaUserToken() // Ta typo préférée ;)
+                            null
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // ===== API & SERVICES =====
-    // Single pour les API et services : une seule instance partagée
-    single<TokenStore> { InMemoryTokenStore() }
+    // On n'injecte plus que le HttpClient (get()), SettingsService n'est plus utile
+    // dans KtorbackendApi si tu utilises le plugin Auth ci-dessus.
+    single<BackendApi> { KtorbackendApi(get()) }
 
-    // API client wired with TokenStore
-    single<BackendApi> { KtorbackendApi(get(), get()) }
+    // Si ton KtorbackendApi a encore besoin du SettingsService pour autre chose :
+    // single<BackendApi> { KtorbackendApi(get(), get()) }
 
     // ===== REPOSITORIES =====
-    // Single pour les repositories : une seule instance partagée
-    single<OnboardingRepository> { OnboardingRepositoryImpl() }
+    single<OnboardingRepository> { OnboardingRepositoryImpl(get()) }
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
     single<TeacherRepository> { TeacherRepositoryImpl(get()) }
-    single<org.julienjnnqin.luxmateapp.domain.repository.ChatRepository> {
-        org.julienjnnqin.luxmateapp.data.repository.ChatRepositoryImpl(get())
-    }
-    single<org.julienjnnqin.luxmateapp.domain.repository.PersonaRepository> {
-        org.julienjnnqin.luxmateapp.data.repository.PersonaRepositoryImpl(get())
-    }
     single<UserRepository> { UserRepositoryImpl(get()) }
 
-
+    // Chat & Persona Repositories
+    single<ChatRepository> {
+        ChatRepositoryImpl(get())
+    }
+    single<PersonaRepository> {
+        PersonaRepositoryImpl(get())
+    }
 }
 
 // ===== DOMAIN LAYER =====
@@ -77,6 +117,7 @@ val domainModule = module {
     factoryOf(::SearchTeachersUseCase)
     factoryOf(::GetUserProfileUseCase)
     factoryOf(::GetChatHistoryUseCase)
+    factoryOf(::IsUserLoggedInUseCase)
 }
 
 // ===== VIEW MODELS =====

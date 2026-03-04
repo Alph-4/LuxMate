@@ -1,4 +1,3 @@
-import org.gradle.kotlin.dsl.debugImplementation
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -30,7 +29,7 @@ kotlin {
         }
     }
 
-    
+
     sourceSets {
         androidMain.dependencies {
             implementation(compose.preview)
@@ -57,15 +56,22 @@ kotlin {
             implementation(libs.coil.compose)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.material.icons.core)
+
+            // Ktor Client
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.ktor.client.auth)
+
             implementation(libs.jetbrains.navigation3.ui)
             implementation(libs.jetbrains.material3.adaptiveNavigation3)
             implementation(libs.jetbrains.lifecycle.viewmodelNavigation3)
 
             // Material Icons
-            implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
+            implementation(libs.material.icons.extended)
+
+            //Settings
+            implementation(libs.multiplatform.settings.no.arg)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

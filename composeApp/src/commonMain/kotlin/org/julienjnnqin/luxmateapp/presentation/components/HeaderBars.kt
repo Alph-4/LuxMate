@@ -29,7 +29,12 @@ fun PreviewHeaderBar() {
 
 @Composable
 fun HeaderBar(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    trailingBtn: Boolean = true,
+    trailingBtnAction: () -> Unit = {},
+    title: String? = null,
+    leadingBtn: Boolean = false,
+    leadingBtnAction: () -> Unit = {}
 ) {
     Row(
         modifier = modifier
@@ -40,16 +45,14 @@ fun HeaderBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-
-        BtnNavItem()
-        TextNavItem()
-        BtnNavItem()
-
+        if (leadingBtn) BtnNavItem(onTap = trailingBtnAction) else Spacer(modifier = Modifier.size(40.dp))
+        if (title != null) TextNavItem(title) else Spacer(modifier = Modifier.size(40.dp))
+        if (trailingBtn) BtnNavItem(leadingBtnAction) else Spacer(modifier = Modifier.size(40.dp))
     }
 }
 
 @Composable
-fun TextNavItem() {
+fun TextNavItem(title: String) {
     Box(
         modifier = Modifier
             .size(40.dp)
@@ -69,7 +72,7 @@ fun TextNavItem() {
 }
 
 @Composable
-fun BtnNavItem() {
+fun BtnNavItem(onTap: () -> Unit) {
     Box(
         modifier = Modifier.size(40.dp)
             .background(

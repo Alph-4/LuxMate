@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.julienjnnqin.luxmateapp.domain.usecase.CheckOnboardingCompletedUseCase
+import org.julienjnnqin.luxmateapp.domain.usecase.IsUserLoggedInUseCase
 import org.julienjnnqin.luxmateapp.presentation.navigation.Screen
 
 /**
@@ -31,7 +32,8 @@ data class AppState(
  * - Détermine juste la destination de démarrage
  */
 class AppViewModel(
-    private val checkOnboardingCompletedUseCase: CheckOnboardingCompletedUseCase
+    private val checkOnboardingCompletedUseCase: CheckOnboardingCompletedUseCase,
+    private val isUserLoggedInUseCase: IsUserLoggedInUseCase
 ) : ViewModel() {
 
     private val _appState = MutableStateFlow(AppState())
@@ -47,17 +49,22 @@ class AppViewModel(
     private fun loadInitialDestination() {
         viewModelScope.launch {
             try {
-                val result = checkOnboardingCompletedUseCase()
-                val startDestination = result.fold(
-                    onSuccess = { isCompleted ->
-                        if (isCompleted) Screen.Login else Screen.Onboarding
-                    },
-                    onFailure = { Screen.Onboarding }
-                )
 
+                // 1. On vérifie l'onboarding
+                val onboardingDone = checkOnboardingCompletedUseCase().getOrDefault(false)
+
+                // 2. On vérifie si un token existe
+                val isLoggedIn = isUserLoggedInUseCase()
+
+                // 3. On calcule la destination
+                val destination = when {
+                    !onboardingDone -> Screen.Onboarding
+                    !isLoggedIn -> Screen.Login
+                    else -> Screen.Home // L'auto-login se produit ici
+                }
                 _appState.value = AppState(
                     isLoading = false,
-                    startDestination = startDestination
+                    startDestination = destination
                 )
             } catch (_: Exception) {
                 // En cas d'erreur, afficher l'onboarding par défaut

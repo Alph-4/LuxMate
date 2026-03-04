@@ -47,7 +47,10 @@ fun OnboardingScreen(
                     .padding(top = 16.dp, bottom = 24.dp),
                 horizontalArrangement = Arrangement.End
             ) {
-                TextButton(onClick = { viewModel.skipOnboarding() }) {
+                TextButton(onClick = {
+                    viewModel.skipOnboarding()
+                    onComplete()
+                }) {
                     Text(
                         "Passer",
                         style = MaterialTheme.typography.titleMedium,

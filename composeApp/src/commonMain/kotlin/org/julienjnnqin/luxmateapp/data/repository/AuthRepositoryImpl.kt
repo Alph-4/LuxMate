@@ -1,18 +1,20 @@
 package org.julienjnnqin.luxmateapp.data.repository
 
-import org.julienjnnqin.luxmateapp.data.auth.TokenStore
+import org.julienjnnqin.luxmateapp.data.local.SettingsService
 import org.julienjnnqin.luxmateapp.data.remote.BackendApi
 import org.julienjnnqin.luxmateapp.domain.entity.User
 import org.julienjnnqin.luxmateapp.domain.repository.AuthRepository
 
-class AuthRepositoryImpl(private val api: BackendApi, private val tokenStore: TokenStore) :
+
+class AuthRepositoryImpl(private val api: BackendApi, private val settings: SettingsService) :
     AuthRepository {
+
     private var currentUser: User? = null
 
     override suspend fun login(email: String, password: String): Result<User> {
         return try {
             val tokenResponse = api.login(email, password)
-            tokenStore.save(tokenResponse)
+            settings.saveUserToken(tokenResponse)
             val user = User(id = tokenResponse.userId, name = "", email = "")
             currentUser = user
             Result.success(user)
@@ -23,13 +25,14 @@ class AuthRepositoryImpl(private val api: BackendApi, private val tokenStore: To
 
     override suspend fun logout(): Result<Unit> {
         return try {
-            tokenStore.clear()
+            settings.cleaUserToken()
             currentUser = null
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
+
 
     override suspend fun getCurrentUser(): Result<User?> {
         return try {

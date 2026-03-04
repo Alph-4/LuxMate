@@ -1,8 +1,8 @@
 package org.julienjnnqin.luxmateapp.di
 
 import android.content.Context
-import org.julienjnnqin.luxmateapp.data.auth.TokenStore
-import org.julienjnnqin.luxmateapp.data.auth.TokenStoreAndroid
+import com.russhwolf.settings.Settings
+import com.russhwolf.settings.SharedPreferencesSettings
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
@@ -16,7 +16,10 @@ import org.koin.dsl.module
 fun initializeKoinAndroid(context: Context) {
     val platformModule = module {
         // éviter une résolution au démarrage et récupérer le Context via `get()`
-        single<TokenStore>(createdAtStart = false) { TokenStoreAndroid(get()) }
+        //single<TokenStore>(createdAtStart = false) { TokenStoreAndroid(get()) }
+        single<Settings> {
+            SharedPreferencesSettings(get<Context>().getSharedPreferences("luxmate_prefs", 0))
+        }
     }
 
     if (GlobalContext.getOrNull() == null) {
