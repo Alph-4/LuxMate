@@ -1,11 +1,12 @@
-package org.julienjnnqin.luxmateapp.data.local
+package org.julienjnnqin.luxmateapp.data.repository
 
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
 import org.julienjnnqin.luxmateapp.data.model.TokenResponse
 import org.julienjnnqin.luxmateapp.domain.repository.SettingsRepository
 
-class SettingsService(private val settings: Settings) : SettingsRepository {
+
+class SettingsRepositoryImpl(private val settings: Settings) : SettingsRepository {
 
     companion object {
         private const val KEY_ACCESS_TOKEN = "access_token"

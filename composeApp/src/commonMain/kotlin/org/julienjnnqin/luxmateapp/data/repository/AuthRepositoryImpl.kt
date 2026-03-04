@@ -1,12 +1,11 @@
 package org.julienjnnqin.luxmateapp.data.repository
 
-import org.julienjnnqin.luxmateapp.data.local.SettingsService
 import org.julienjnnqin.luxmateapp.data.remote.BackendApi
 import org.julienjnnqin.luxmateapp.domain.entity.User
 import org.julienjnnqin.luxmateapp.domain.repository.AuthRepository
 
 
-class AuthRepositoryImpl(private val api: BackendApi, private val settings: SettingsService) :
+class AuthRepositoryImpl(private val api: BackendApi, private val settings: SettingsRepositoryImpl) :
     AuthRepository {
 
     private var currentUser: User? = null

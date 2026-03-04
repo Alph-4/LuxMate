@@ -9,7 +9,6 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import org.julienjnnqin.luxmateapp.data.config.JsonConfig
-import org.julienjnnqin.luxmateapp.data.local.SettingsService
 import org.julienjnnqin.luxmateapp.data.model.RefreshTokenRequest
 import org.julienjnnqin.luxmateapp.data.model.TokenResponse
 import org.julienjnnqin.luxmateapp.data.remote.BackendApi
@@ -46,7 +45,7 @@ val appModule = module {
             install(Auth) {
                 bearer {
                     loadTokens {
-                        val settings = get<SettingsService>()
+                        val settings = get<SettingsRepositoryImpl>()
                         val access = settings.getAccessToken()
                         val refresh = settings.getRefreshToken()
 
@@ -56,7 +55,7 @@ val appModule = module {
                     }
 
                     refreshTokens {
-                        val settings = get<SettingsService>()
+                        val settings = get<SettingsRepositoryImpl>()
                         try {
                             val oldRefresh = settings.getRefreshToken() ?: return@refreshTokens null
 
@@ -85,14 +84,12 @@ val appModule = module {
     // dans KtorbackendApi si tu utilises le plugin Auth ci-dessus.
     single<BackendApi> { KtorbackendApi(get()) }
 
-    // Si ton KtorbackendApi a encore besoin du SettingsService pour autre chose :
-    // single<BackendApi> { KtorbackendApi(get(), get()) }
-
     // ===== REPOSITORIES =====
     single<OnboardingRepository> { OnboardingRepositoryImpl(get()) }
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
     single<TeacherRepository> { TeacherRepositoryImpl(get()) }
     single<UserRepository> { UserRepositoryImpl(get()) }
+    single<SettingsRepository> { SettingsRepositoryImpl(get()) }
 
     // Chat & Persona Repositories
     single<ChatRepository> {
