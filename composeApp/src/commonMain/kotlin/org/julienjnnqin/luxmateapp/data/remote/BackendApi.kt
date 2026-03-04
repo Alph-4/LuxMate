@@ -86,7 +86,7 @@ class KtorbackendApi(private val client: HttpClient) :
 
     override suspend fun getSession(sessionId: String): ChatSession {
         println("KtorbackendApi getSession: fetching session details for sessionId=$sessionId")
-        val response = client.get("chat/sessions/$sessionId")
+        val response = client.get("$API_URL/chat/sessions/$sessionId")
 
         if (response.status == HttpStatusCode.OK) {
             println("getSession: success for sessionId=$sessionId with response=${response.bodyAsText()}")
@@ -102,12 +102,41 @@ class KtorbackendApi(private val client: HttpClient) :
     override suspend fun getCurrentUser(): UserResponse =
         client.get("$API_URL/auth/me").body()
 
-    override suspend fun getMessages(sessionId: String): List<ChatMessage> =
-        client.get("$API_URL/chat/sessions/$sessionId/messages").body()
+    override suspend fun getMessages(sessionId: String): List<ChatMessage> {
+        println("KtorbackendApi getMessages for sessionId=$sessionId")
+
+        val response = client.get("$API_URL/chat/sessions/$sessionId/messages")
+        if (response.status == HttpStatusCode.OK) {
+            println("getMessages: success for sessionId=$sessionId with response=${response.bodyAsText()}")
+            return response.body()
+        } else if (response.status == HttpStatusCode.Unauthorized) {
+            // Ici tu gères la déconnexion ou le refresh token
+            throw Exception("Session expirée, merci de vous reconnecter")
+        } else {
+            throw Exception("Erreur serveur : ${response.status}")
+        }
+
+    }
 
     override suspend fun sendMessage(
         sessionId: String,
         request: SendMessageRequest
-    ): SendMessageResponse =
-        client.post("$API_URL/chat/sessions/$sessionId/messages").body()
+    ): SendMessageResponse {
+        println("KtorbackendApi sendMessage for sessionId=$sessionId with request=$request")
+
+        val response = client.post("$API_URL/chat/sessions/$sessionId/messages") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }
+
+        if (response.status == HttpStatusCode.OK) {
+            println("sendMessage: success for sessionId=$sessionId with response=${response.bodyAsText()}")
+            return response.body()
+        } else if (response.status == HttpStatusCode.Unauthorized) {
+            // Ici tu gères la déconnexion ou le refresh token
+            throw Exception("Session expirée, merci de vous reconnecter")
+        } else {
+            throw Exception("Erreur serveur : ${response.status}")
+        }
+    }
 }

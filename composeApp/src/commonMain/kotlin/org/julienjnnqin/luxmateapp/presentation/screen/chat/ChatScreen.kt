@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,7 +56,8 @@ fun ChatDetailScreen(
         LazyColumn(
             state = listState,
             modifier = Modifier.weight(1f).fillMaxWidth(),
-            contentPadding = PaddingValues(16.dp),
+            // Augmente le padding bottom pour laisser de la place à la barre de saisie et à la nav bar
+            contentPadding = PaddingValues(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 120.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(messages) { msg ->
@@ -74,36 +76,110 @@ fun ChatDetailScreen(
         }
 
         // --- INPUT BAR ---
-        // --- BARRE DE SAISIE (InputBar) ---
+        ChatInputBar(
+            text = input,
+            onTextChange = { input = it },
+            onSend = {
+                if (input.isNotBlank()) {
+                    viewModel.sendMessage(input)
+                    input = ""
+                }
+            },
+            onMic = { /* TODO: action micro */ }
+        )
+
+        // petit espace de sécurité sous la barre (utile si navigation bar est présente)
+        Spacer(modifier = Modifier.height(12.dp))
+    }
+}
+
+@Composable
+private fun ChatInputBar(
+    text: String,
+    onTextChange: (String) -> Unit,
+    onSend: () -> Unit,
+    onMic: () -> Unit
+) {
+    // Container global
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.Transparent)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        // Pill background + input
         Row(
-            modifier = Modifier.fillMaxWidth().background(Color(0xFFF3F4F6)).padding(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TextField(
-                value = input,
-                onValueChange = { input = it },
-                modifier = Modifier.weight(1f),
-                placeholder = { Text("Écrivez votre message...") },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent
-                )
-            )
-            IconButton(
-                onClick = {
-                    if (input.isNotBlank()) {
-                        viewModel.sendMessage(input)
-                        input = ""
-                    }
-                },
-                enabled = input.isNotBlank()
+            // Main pill (icône micro + champ)
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(56.dp)
+                    .background(Color(0xFFF3F4F6), RoundedCornerShape(28.dp))
+                    .padding(start = 12.dp, end = 72.dp), // laisse de la place pour le bouton send qui chevauche
+                contentAlignment = Alignment.CenterStart
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Send,
-                    contentDescription = "Envoyer",
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(24.dp)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                        onClick = onMic, modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(Color.White)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Mic,
+                            contentDescription = "Micro",
+                            tint = Color(0xFF6B7280)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    TextField(
+                        value = text,
+                        onValueChange = onTextChange,
+                        placeholder = { Text("Ask Professor Pierre a question...") },
+                        singleLine = true,
+                        colors = TextFieldDefaults.textFieldColors(
+                            containerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                            textColor = Color(0xFF0F1724),
+                            placeholderColor = Color(0xFF9CA3AF)
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+
+            // Send button (chevauche la pastille)
+            Box(
+                modifier = Modifier
+                    .offset(x = (-56).dp) // fait chevaucher le bouton sur la pastille
+                    .size(56.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                val gradient = Brush.linearGradient(
+                    colors = listOf(Color(0xFF8B5CF6), Color(0xFF7C3AED))
                 )
+                IconButton(
+                    onClick = onSend,
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(gradient)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Send,
+                        contentDescription = "Envoyer",
+                        tint = Color.White
+                    )
+                }
             }
         }
     }

@@ -55,6 +55,7 @@ val appModule = module {
                     }
 
                     refreshTokens {
+                        println("REFRSH: Ktor a détecté une 401 avec challenge, tentative...")
                         val settings = get<SettingsRepository>()
                         try {
                             val oldRefresh = settings.getRefreshToken() ?: return@refreshTokens null
@@ -130,7 +131,6 @@ val viewModelModule = module {
     factoryOf(::LoginViewModel)
     factoryOf(::PersonasViewModel)
     factoryOf(::ProfileViewModel)
-    factoryOf(::PersonasViewModel)
     factoryOf(::HomeViewModel)
     factoryOf(::ChatViewModel)
 
