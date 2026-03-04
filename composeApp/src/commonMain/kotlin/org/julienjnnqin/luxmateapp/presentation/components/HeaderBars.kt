@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -40,6 +41,7 @@ fun HeaderBar(
         modifier = modifier
             .fillMaxWidth(0.94f)
             .height(64.dp)
+            .shadow(20.dp, RoundedCornerShape(28.dp), ambientColor = Color.LightGray)
             .background(
                 color = Color.White,
                 shape = RoundedCornerShape(24.dp)
@@ -49,21 +51,16 @@ fun HeaderBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (leadingBtn) BtnNavItem(onTap = trailingBtnAction) else Spacer(modifier = Modifier.size(40.dp))
+        if (trailingBtn) BtnNavItem(onTap = trailingBtnAction) else Spacer(modifier = Modifier.size(40.dp))
         if (title != null) TextNavItem(title) else Spacer(modifier = Modifier.size(40.dp))
-        if (trailingBtn) BtnNavItem(leadingBtnAction) else Spacer(modifier = Modifier.size(40.dp))
+        if (leadingBtn) BtnNavItem(leadingBtnAction) else Spacer(modifier = Modifier.size(40.dp))
     }
 }
 
 @Composable
 fun TextNavItem(title: String) {
     Box(
-        modifier = Modifier
-            .size(40.dp)
-            .background(
-                color = MaterialTheme.colorScheme.primary,
-                shape = CircleShape
-            ),
+        modifier = Modifier,
         contentAlignment = Alignment.Center
     ) {
         Text(title, color = MaterialTheme.colorScheme.onPrimary)
