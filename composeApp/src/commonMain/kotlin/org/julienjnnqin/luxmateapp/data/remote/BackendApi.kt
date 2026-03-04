@@ -85,7 +85,8 @@ class KtorbackendApi(private val client: HttpClient) :
     }
 
     override suspend fun getSession(sessionId: String): ChatSession {
-        val response = client.get("chat/sessions")
+        println("KtorbackendApi getSession: fetching session details for sessionId=$sessionId")
+        val response = client.get("chat/sessions/$sessionId")
 
         if (response.status == HttpStatusCode.OK) {
             println("getSession: success for sessionId=$sessionId with response=${response.bodyAsText()}")
