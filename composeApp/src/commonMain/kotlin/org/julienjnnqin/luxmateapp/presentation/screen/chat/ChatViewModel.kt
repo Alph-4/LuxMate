@@ -108,8 +108,9 @@ class ChatViewModel(
                     id = "local-${Random.nextLong(Long.MAX_VALUE)}",
                     content = content,
                     timestamp = "now",
-                    isFromUser = true
-                )
+                    isFromUser = true,
+
+                    )
                 val current = _messagesState.value.toMutableList()
                 current.add(userMsg)
                 _messagesState.value = current.toList()

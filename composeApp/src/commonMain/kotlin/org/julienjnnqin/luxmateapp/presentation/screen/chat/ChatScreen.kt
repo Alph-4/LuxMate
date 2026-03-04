@@ -1,12 +1,7 @@
 package org.julienjnnqin.luxmateapp.presentation.screen.chat
 
 
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -20,13 +15,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachFile
-import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
@@ -36,6 +32,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.julienjnnqin.luxmateapp.domain.entity.Message
 import org.julienjnnqin.luxmateapp.presentation.components.HeaderBar
 
 @Composable
@@ -68,7 +65,7 @@ fun ChatDetailScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(messages) { msg ->
-                if (msg.isFromUser) OutgoingBubble(msg.content) else IncomingBubble(msg.content)
+                if (msg.isFromUser) OutgoingBubble(msg.content) else IncomingBubble(msg)
             }
             if (isThinking) {
                 item { ThinkingIndicator() }
@@ -77,7 +74,9 @@ fun ChatDetailScreen(
 
         // --- COUCHE 2 : TOP BAR (Flottante) ---
         HeaderBar(
-            modifier = Modifier.align(Alignment.TopCenter),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .windowInsetsPadding(WindowInsets.statusBars),
             trailingBtn = true,
             trailingBtnAction = onBack,
             title = "Professor Pierre",
@@ -258,25 +257,84 @@ fun ThreeDotsAnimation() {
 }
 
 @Composable
-private fun IncomingBubble(text: String) {
-    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp), verticalAlignment = Alignment.Top) {
-        Box(
-            modifier = Modifier.size(36.dp).clip(CircleShape).background(Color(0xFFF3F4F6)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(imageVector = Icons.Filled.Mic, contentDescription = null) // just placeholder icon
-        }
+fun IncomingBubble(message: Message) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(end = 64.dp),
+        horizontalArrangement = Arrangement.Start
+    ) {
+        // Avatar du prof
+
+
         Spacer(modifier = Modifier.width(8.dp))
-        Column {
-            Box(
-                modifier = Modifier
-                    .background(Color.White, RoundedCornerShape(12.dp))
-                    .padding(12.dp)
-            ) {
-                Text(text = text, color = Color(0xFF0F1724))
+
+        Surface(
+            shape = RoundedCornerShape(topStart = 4.dp, topEnd = 20.dp, bottomStart = 20.dp, bottomEnd = 20.dp),
+            color = Color.White,
+            border = BorderStroke(1.dp, Color(0xFFF1F5F9))
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                if (message.structuredData != null) {
+                    val data = message.structuredData
+
+                    // 1. Greeting & Main Point
+                    Text(text = "${data.greeting} ${data.mainPoint}", fontSize = 15.sp, color = Color(0xFF1E293B))
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // 2. Details (Les blocs avec bordure colorée comme sur ton image)
+                    data.details.forEachIndexed { index, detail ->
+                        DefinitionBlock(
+                            text = detail,
+                            color = if (index % 2 == 0) Color(0xFF6366F1) else Color(0xFFA855F7)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    // 3. Analogy
+                    Text(
+                        text = data.analogy,
+                        fontSize = 15.sp,
+                        color = Color(0xFF1E293B),
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+
+                    // 4. Next Step (Question de relance)
+                    Text(
+                        text = data.nextStep,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF4F46E5)
+                    )
+                } else {
+                    // Fallback si pas de structure
+                    Text(text = message.content, fontSize = 15.sp)
+                }
             }
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "Read 10:42 AM", fontSize = 11.sp, color = Color(0xFF9CA3AF))
+        }
+    }
+}
+
+@Composable
+fun DefinitionBlock(text: String, color: Color) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = Color(0xFFF8FAFC),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Row(modifier = Modifier.width(IntrinsicSize.Min)) {
+            // La barre colorée à gauche
+            Box(modifier = Modifier.fillMaxHeight().width(4.dp).background(color))
+
+            // Le texte (on peut split par ':' pour mettre le titre en gras)
+            val parts = text.split(":", limit = 2)
+            Column(modifier = Modifier.padding(12.dp)) {
+                if (parts.size > 1) {
+                    Text(text = parts[0] + ":", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(text = parts[1].trim(), fontSize = 14.sp, color = Color(0xFF475569))
+                } else {
+                    Text(text = text, fontSize = 14.sp, color = Color(0xFF475569))
+                }
+            }
         }
     }
 }
