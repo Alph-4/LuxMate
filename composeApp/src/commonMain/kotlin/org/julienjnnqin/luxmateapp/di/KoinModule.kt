@@ -45,7 +45,7 @@ val appModule = module {
             install(Auth) {
                 bearer {
                     loadTokens {
-                        val settings = get<SettingsRepositoryImpl>()
+                        val settings = get<SettingsRepository>()
                         val access = settings.getAccessToken()
                         val refresh = settings.getRefreshToken()
 
@@ -55,7 +55,7 @@ val appModule = module {
                     }
 
                     refreshTokens {
-                        val settings = get<SettingsRepositoryImpl>()
+                        val settings = get<SettingsRepository>()
                         try {
                             val oldRefresh = settings.getRefreshToken() ?: return@refreshTokens null
 
@@ -115,6 +115,10 @@ val domainModule = module {
     factoryOf(::GetUserProfileUseCase)
     factoryOf(::GetChatHistoryUseCase)
     factoryOf(::IsUserLoggedInUseCase)
+    factoryOf(::GetMessagesUseCase)
+    factoryOf(::GetSessionsUseCase)
+    factoryOf(::GetSessionUseCase)
+    factoryOf(::SendMessageUseCase)
 }
 
 // ===== VIEW MODELS =====
@@ -128,8 +132,6 @@ val viewModelModule = module {
     factoryOf(::ProfileViewModel)
     factoryOf(::PersonasViewModel)
     factoryOf(::HomeViewModel)
+    factoryOf(::ChatViewModel)
 
-    factory { (personaId: String) ->
-        ChatViewModel(personaId, get())
-    }
 }

@@ -20,13 +20,19 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.julienjnnqin.luxmateapp.core.theme.SuccessGreen
+import org.julienjnnqin.luxmateapp.core.utils.TeacherLevel
 import org.julienjnnqin.luxmateapp.core.utils.TeacherTheme
 import org.julienjnnqin.luxmateapp.domain.entity.Persona
 import org.julienjnnqin.luxmateapp.presentation.components.TopAppBarTeachers
 
 @Composable
-fun PersonasScreen(viewModel: PersonasViewModel, onPersonaSelected: (String) -> Unit) {
+fun PersonasScreen(
+    viewModel: PersonasViewModel,
+    onPersonaSelected: (String) -> Unit,
+    startChatWithPersona: (String) -> Unit
+) {
 
     val uiState by viewModel.uiState.collectAsState()
 
@@ -93,7 +99,8 @@ fun PersonasScreen(viewModel: PersonasViewModel, onPersonaSelected: (String) -> 
                 items(uiState.personas) { persona ->
                     TeacherCard(
                         persona = persona,
-                        onSelect = { onPersonaSelected(persona.id) }
+                        onSelect = { onPersonaSelected(persona.id) },
+                        startChat = { startChatWithPersona(persona.id) }
                     )
                 }
             }
@@ -102,10 +109,30 @@ fun PersonasScreen(viewModel: PersonasViewModel, onPersonaSelected: (String) -> 
 }
 
 
+@Preview
+@Composable
+fun TeacherCardPreview() {
+    TeacherCard(
+        Persona(
+            id = "AI-042",
+            name = "John Doe",
+            subject = "Mathématiques",
+            theme = TeacherTheme.SCIENCE,
+            level = TeacherLevel.INTERMEDIATE,
+            description = "Prof passionné de mathématiques et de pédagogie innovante.",
+            avatar = "",
+            rating = 4.5f
+        ),
+        onSelect = { },
+        startChat = { }
+    )
+}
+
 @Composable
 private fun TeacherCard(
     persona: Persona,
-    onSelect: () -> Unit
+    onSelect: () -> Unit,
+    startChat: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -205,7 +232,7 @@ private fun TeacherCard(
 
                 // Commencer button
                 Button(
-                    onClick = { /* Start chat */ },
+                    onClick =  startChat ,
                     modifier = Modifier.weight(1.5f),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(

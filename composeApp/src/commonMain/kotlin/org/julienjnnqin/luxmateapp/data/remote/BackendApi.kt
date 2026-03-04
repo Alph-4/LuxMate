@@ -37,7 +37,7 @@ class KtorbackendApi(private val client: HttpClient) :
 
 
     override suspend fun login(email: String, password: String): TokenResponse {
-        println("login: email=$email")
+        println("KtorbackendApi login: email=$email")
         val resp = client
             .post("${API_URL}/auth/login") {
                 contentType(ContentType.Application.Json)
@@ -55,7 +55,7 @@ class KtorbackendApi(private val client: HttpClient) :
     }
 
     override suspend fun refreshToken(refreshToken: String): TokenResponse {
-        println("refreshToken: manual refresh")
+        println("KtorbackendApi refreshToken: manual refresh")
         val resp = client
             .post("${API_URL}/auth/refresh") {
                 header("Content-Type", ContentType.Application.Json.contentType)
@@ -74,11 +74,29 @@ class KtorbackendApi(private val client: HttpClient) :
     override suspend fun getSessions(): List<ChatSession> =
         client.get("$API_URL/chat/sessions").body()
 
-    override suspend fun createSession(personaId: String): ChatSession =
-        client.post("$API_URL/chat/sessions").body()
+    override suspend fun createSession(personaId: String): ChatSession {
+        return client.post("$API_URL/chat/sessions") {
+            // OBLIGATOIRE : Dis au serveur que c'est du JSON
+            contentType(ContentType.Application.Json)
 
-    override suspend fun getSession(sessionId: String): ChatSession =
-        client.get("$API_URL/chat/sessions/$sessionId").body()
+            // Envoie l'objet sérialisé
+            setBody(CreateChatSessionRequest(personaId = personaId))
+        }.body()
+    }
+
+    override suspend fun getSession(sessionId: String): ChatSession {
+        val response = client.get("chat/sessions")
+
+        if (response.status == HttpStatusCode.OK) {
+            println("getSession: success for sessionId=$sessionId with response=${response.bodyAsText()}")
+            return response.body()
+        } else if (response.status == HttpStatusCode.Unauthorized) {
+            // Ici tu gères la déconnexion ou le refresh token
+            throw Exception("Session expirée, merci de vous reconnecter")
+        } else {
+            throw Exception("Erreur serveur : ${response.status}")
+        }
+    }
 
     override suspend fun getCurrentUser(): UserResponse =
         client.get("$API_URL/auth/me").body()

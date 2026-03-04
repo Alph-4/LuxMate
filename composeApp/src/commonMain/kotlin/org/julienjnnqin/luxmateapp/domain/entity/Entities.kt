@@ -1,8 +1,8 @@
 package org.julienjnnqin.luxmateapp.domain.entity
 
 import kotlinx.serialization.Serializable
-import org.julienjnnqin.luxmateapp.core.utils.TeacherLevel
 import org.julienjnnqin.luxmateapp.core.utils.Role
+import org.julienjnnqin.luxmateapp.core.utils.TeacherLevel
 import org.julienjnnqin.luxmateapp.core.utils.TeacherTheme
 
 @Serializable
@@ -42,3 +42,12 @@ data class ChatHistory(
     val lastMessage: String
 )
 
+data class Message(val id: String, val content: String, val timestamp: String, val isFromUser: Boolean)
+
+data class Conversation(
+    val id: String,
+    val title: String,
+    val lastMessage: String,
+    val lastSeen: String,
+    val unreadCount: Int = 0
+)

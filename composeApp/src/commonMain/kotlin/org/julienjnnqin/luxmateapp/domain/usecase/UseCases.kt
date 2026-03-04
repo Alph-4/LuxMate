@@ -1,5 +1,6 @@
 package org.julienjnnqin.luxmateapp.domain.usecase
 
+import org.julienjnnqin.luxmateapp.data.model.SendMessageRequest
 import org.julienjnnqin.luxmateapp.domain.entity.ChatHistory
 import org.julienjnnqin.luxmateapp.domain.entity.Persona
 import org.julienjnnqin.luxmateapp.domain.entity.User
@@ -82,5 +83,22 @@ class GetChatHistoryUseCase(
     suspend operator fun invoke(): Result<List<ChatHistory>> {
         return userRepository.getChatHistory()
     }
+}
+
+class GetMessagesUseCase(private val repository: ChatRepository) {
+    suspend operator fun invoke(sessionId: String) = repository.getMessages(sessionId)
+}
+
+class GetSessionsUseCase(private val repository: ChatRepository) {
+    suspend operator fun invoke() = repository.getSessions()
+}
+
+class GetSessionUseCase(private val repository: ChatRepository) {
+    suspend operator fun invoke(sessionId: String) = repository.getSession(sessionId)
+}
+
+class SendMessageUseCase(private val repository: ChatRepository) {
+    suspend operator fun invoke(sessionId: String, request: SendMessageRequest) =
+        repository.sendMessage(sessionId, request)
 }
 

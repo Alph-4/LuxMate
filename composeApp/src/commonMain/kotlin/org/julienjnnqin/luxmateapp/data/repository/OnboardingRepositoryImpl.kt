@@ -6,7 +6,6 @@ import org.julienjnnqin.luxmateapp.domain.entity.OnboardingState
 import org.julienjnnqin.luxmateapp.domain.repository.OnboardingRepository
 
 class OnboardingRepositoryImpl(private val settings: Settings) : OnboardingRepository {
-    private var isCompleted = false
 
     companion object {
         private const val KEY_ONBOARDING = "pref_onboarding_done"

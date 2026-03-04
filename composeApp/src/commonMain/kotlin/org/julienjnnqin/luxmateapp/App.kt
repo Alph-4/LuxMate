@@ -82,7 +82,7 @@ fun AppContent() {
                         selectedIndex = when (currentRoute) {
                             Screen.Home.route -> 0
                             Screen.Personas.route -> 1
-                            Screen.Chat.route -> 2
+                            Screen.SessionsList.route -> 2
                             Screen.Profile.route -> 3
                             else -> 0
                         },
@@ -90,7 +90,7 @@ fun AppContent() {
                             when (it) {
                                 0 -> navController.navigate(Screen.Home.route)
                                 1 -> navController.navigate(Screen.Personas.route)
-                                2 -> navController.navigate(Screen.Chat.route)
+                                2 -> navController.navigate(Screen.SessionsList.route)
                                 3 -> navController.navigate(Screen.Profile.route)
                             }
                         },

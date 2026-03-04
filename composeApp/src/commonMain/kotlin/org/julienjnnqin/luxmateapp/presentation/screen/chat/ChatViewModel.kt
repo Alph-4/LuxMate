@@ -1,32 +1,29 @@
 package org.julienjnnqin.luxmateapp.presentation.screen.chat
 
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.julienjnnqin.luxmateapp.data.model.SendMessageRequest
-import org.julienjnnqin.luxmateapp.domain.repository.ChatRepository
+import org.julienjnnqin.luxmateapp.domain.entity.Conversation
+import org.julienjnnqin.luxmateapp.domain.entity.Message
+import org.julienjnnqin.luxmateapp.domain.usecase.GetMessagesUseCase
+import org.julienjnnqin.luxmateapp.domain.usecase.GetSessionUseCase
+import org.julienjnnqin.luxmateapp.domain.usecase.GetSessionsUseCase
+import org.julienjnnqin.luxmateapp.domain.usecase.SendMessageUseCase
 import kotlin.random.Random
 
 // Presentation models used by the composables
-data class Message(val id: String, val content: String, val timestamp: String, val isFromUser: Boolean)
 
-data class Conversation(
-    val id: String,
-    val title: String,
-    val lastMessage: String,
-    val lastSeen: String,
-    val unreadCount: Int = 0
-)
 
-class ChatViewModel(private val personaId: String, private val chatRepository: ChatRepository) : ViewModel() {
-    private val scopeJob = Job()
-    private val scope = CoroutineScope(scopeJob + Dispatchers.Default)
-
+class ChatViewModel(
+    private val getMessagesUseCase: GetMessagesUseCase,
+    private val getSessionsUseCase: GetSessionsUseCase,
+    private val getSessionUseCase: GetSessionUseCase,
+    private val sendMessageUseCase: SendMessageUseCase
+) : ViewModel() {
     private val _sessionsState = MutableStateFlow<List<Conversation>>(emptyList())
     val sessionsState: StateFlow<List<Conversation>> = _sessionsState.asStateFlow()
 
@@ -38,17 +35,20 @@ class ChatViewModel(private val personaId: String, private val chatRepository: C
     val isThinking: StateFlow<Boolean> = _isThinking.asStateFlow()
 
     // Current session id for open chat
-    var currentSessionId: String = ""
-        private set
+    private val _currentSessionIdState = MutableStateFlow("")
+    val currentSessionIdState: StateFlow<String> = _currentSessionIdState.asStateFlow()
+
+    // 2. Garde l'accès direct en String pour la logique interne (facultatif mais pratique)
+    val currentSessionId: String get() = _currentSessionIdState.value
 
     init {
         // Load existing sessions on init
-        scope.launch { loadSessions() }
+        viewModelScope.launch { loadSessions() }
     }
 
     private suspend fun loadSessions() {
         try {
-            val sessions = chatRepository.getSessions()
+            val sessions = getSessionsUseCase()
             val convs = sessions.map { s ->
                 Conversation(
                     id = s.id,
@@ -66,10 +66,10 @@ class ChatViewModel(private val personaId: String, private val chatRepository: C
     }
 
     fun openSession(sessionId: String) {
-        currentSessionId = sessionId
-        scope.launch {
+        _currentSessionIdState.value = sessionId
+        viewModelScope.launch {
             try {
-                val messages = chatRepository.getMessages(sessionId)
+                val messages = getMessagesUseCase(sessionId)
                 _messagesState.value = messages.map { m ->
                     Message(id = m.id, content = m.content, timestamp = m.createdAt, isFromUser = m.role == "user")
                 }
@@ -79,34 +79,28 @@ class ChatViewModel(private val personaId: String, private val chatRepository: C
         }
     }
 
-    fun createSessionAndOpen(personaId: String = this.personaId) {
-        scope.launch {
+    fun createSessionAndOpen(sessionId: String) {
+        //  if (_isLoading.value || currentSessionId.isNotBlank()) return
+
+        viewModelScope.launch {
+            //_isLoading.value = true
             try {
-                val session = chatRepository.createSession(personaId)
-                // refresh sessions list
-                loadSessions()
+                println("Creating or open session with personaId: $sessionId")
+                val session = getSessionUseCase(sessionId)
+                println("Session details fetched: id=${session.id}, personaName=${session.personaName}")
                 openSession(session.id)
             } catch (e: Exception) {
-                e.printStackTrace()
+                println("Session existante ou erreur: ${e.message}")
+            } finally {
+                //_isLoading.value = false
             }
         }
     }
 
     fun sendMessage(content: String) {
         if (content.isBlank()) return
-        if (currentSessionId.isBlank()) {
-            // create session first
-            createSessionAndOpen()
-            // wait shortly for session to be created and opened
-            scope.launch {
-                // naive wait — in practice you'd chain calls
-                kotlinx.coroutines.delay(500)
-                sendMessage(content)
-            }
-            return
-        }
 
-        scope.launch {
+        viewModelScope.launch {
             _isThinking.value = true
             try {
                 // append user message locally
@@ -120,7 +114,7 @@ class ChatViewModel(private val personaId: String, private val chatRepository: C
                 current.add(userMsg)
                 _messagesState.value = current.toList()
 
-                val resp = chatRepository.sendMessage(currentSessionId, SendMessageRequest(content))
+                val resp = sendMessageUseCase(currentSessionId, SendMessageRequest(content))
 
                 val assistantText = resp.message ?: resp.structuredResponse?.mainPoint ?: ""
                 if (assistantText.isNotBlank()) {
@@ -143,9 +137,5 @@ class ChatViewModel(private val personaId: String, private val chatRepository: C
                 _isThinking.value = false
             }
         }
-    }
-
-    fun clear() {
-        scopeJob.cancel()
     }
 }

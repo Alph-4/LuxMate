@@ -17,11 +17,23 @@ class ChatRepositoryImpl(
 
     // Create new session
     override suspend fun createSession(personaId: String): ChatSession {
-        return backendApi.createSession(personaId)
+        println("ChatRepo creating session for personaId=$personaId")
+
+        return try {
+            val session = backendApi.createSession(personaId)
+            println("✅ ChatRepo Session created successfully: ${session.id}")
+            session // Retourne la session si tout va bien
+        } catch (e: Exception) {
+            println("❌ ChatRepo Error creating session: ${e.message}")
+            // Au lieu de retourner null et de crash, on relance l'erreur
+            // ou on retourne une erreur propre pour que le ViewModel la gère
+            throw e
+        }
     }
 
     // Get session details
     override suspend fun getSession(sessionId: String): ChatSession {
+        println("ChatRepo fetching session details for sessionId=$sessionId")
         return backendApi.getSession(sessionId)
     }
 

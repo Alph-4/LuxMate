@@ -1,7 +1,7 @@
 package org.julienjnnqin.luxmateapp.presentation.screen.chat
 
+
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,8 +9,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
@@ -19,233 +17,95 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-/**
- * Wrapper ChatScreen (utilisé par NavigationHost). Montre soit la liste des sessions soit le détail du chat
- * en fonction de l'état du ViewModel. Il crée et ouvre une session pour le `personaId` fourni via la factory Koin.
- */
-@Composable
-fun ChatScreen(viewModel: ChatViewModel, onBack: () -> Unit) {
-    // create session for persona when screen opens
-    LaunchedEffect(Unit) {
-        viewModel.createSessionAndOpen()
-    }
-
-    // if a session is open, currentSessionId will be non-empty
-    if (viewModel.currentSessionId.isNotBlank()) {
-        ChatDetailScreen(viewModel = viewModel, conversationId = viewModel.currentSessionId, onBack = onBack)
-    } else {
-        ConversationsScreen(viewModel = viewModel, onOpenConversation = { /* navigation handled by outer wrapper */ })
-    }
-}
-
-
-/**
- * Conversations list (style Telegram) and chat detail screen.
- * - ConversationsScreen: shows list of conversations with avatar, last message, unread badge.
- * - ChatDetailScreen: shows messages, message bubbles, input bar with send/attach/mic.
- * Both screens use ChatViewModel provided in commonMain.
- */
+import org.julienjnnqin.luxmateapp.presentation.components.HeaderBar
 
 @Composable
-fun ConversationsScreen(viewModel: ChatViewModel, onOpenConversation: (String) -> Unit) {
-    val uiState by viewModel.sessionsState.collectAsState()
-
-    Surface(
-        modifier = Modifier
-            .fillMaxSize(), color = Color(0xFFF6F7FB)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .windowInsetsPadding(WindowInsets.statusBars)
-                .padding(12.dp)
-        ) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column {
-                    Text(text = "Messages", fontSize = 20.sp, color = Color(0xFF0F1724))
-                    Text(text = "Recent conversations", fontSize = 12.sp, color = Color(0xFF6B7280))
-                }
-                // Placeholder action
-                Button(onClick = { /* new chat */ }) { Text("New") }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-            if (uiState.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "No conversations yet. Start a new chat!", color = Color(0xFF9CA3AF))
-                }
-            } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(uiState) { conv ->
-                        ConversationRow(conversation = conv, onClick = {
-                            onOpenConversation(conv.id)
-                            viewModel.openSession(conv.id)
-                        })
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ConversationRow(conversation: Conversation, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .background(Color.Transparent)
-            .padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-
-        // Avatar
-        Box(
-            modifier = Modifier.size(52.dp).clip(CircleShape).background(Color(0xFFEFF6FF)),
-            contentAlignment = Alignment.Center
-        ) {
-            // Placeholder initial
-            Text(text = conversation.title.take(1), fontSize = 20.sp, color = Color(0xFF2563EB))
-        }
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = conversation.title, fontSize = 16.sp, color = Color(0xFF0F1724))
-                Text(text = conversation.lastSeen, fontSize = 12.sp, color = Color(0xFF9CA3AF))
-            }
-            Spacer(modifier = Modifier.height(6.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = conversation.lastMessage,
-                    fontSize = 14.sp,
-                    color = Color(0xFF6B7280),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                if (conversation.unreadCount > 0) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF2563EB))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(text = conversation.unreadCount.toString(), color = Color.White, fontSize = 12.sp)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ChatDetailScreen(viewModel: ChatViewModel, conversationId: String, onBack: () -> Unit) {
-    val uiState by viewModel.messagesState.collectAsState()
+fun ChatDetailScreen(
+    viewModel: ChatViewModel,
+    sessionId: String,
+    onBack: () -> Unit
+) {
+    val messages by viewModel.messagesState.collectAsState()
     val isThinking by viewModel.isThinking.collectAsState()
+    val currentSessionId by viewModel.currentSessionIdState.collectAsState()  // Assure-toi d'avoir un StateFlow pour ça
     var input by remember { mutableStateOf("") }
-
     val listState = rememberLazyListState()
 
-    LaunchedEffect(uiState.size) {
-        if (uiState.isNotEmpty()) {
-            listState.animateScrollToItem(uiState.size - 1)
-        }
+    // Création/Récupération de la session au lancement
+    LaunchedEffect(sessionId) {
+        viewModel.createSessionAndOpen(sessionId)
     }
 
-    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            // Header
-            Row(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = null,
-                    modifier = Modifier.clickable { onBack() })
-                Spacer(modifier = Modifier.width(10.dp))
-                Box(
-                    modifier = Modifier.size(44.dp).clip(CircleShape).background(Color(0xFFEFF6FF)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = viewModel.currentSessionId.take(1), color = Color(0xFF2563EB))
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Column {
-                    Text(text = viewModel.currentSessionId, fontSize = 16.sp, color = Color(0xFF0F1724))
-                    Text(text = "Active now", fontSize = 12.sp, color = Color(0xFF6B7280))
-                }
+    // Auto-scroll vers le bas
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size - 1)
+    }
+
+    Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+        // --- TOP BAR ---
+        HeaderBar(
+            trailingBtn = true,
+            trailingBtnAction = onBack,
+            title = if (currentSessionId.isEmpty()) "Chargement..." else "Discussion",
+        )
+
+        // --- MESSAGES ---
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(messages) { msg ->
+                if (msg.isFromUser) OutgoingBubble(msg.content) else IncomingBubble(msg.content)
             }
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            // Messages list
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxWidth().weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(uiState) { msg ->
-                    if (msg.isFromUser) {
-                        OutgoingBubble(msg.content)
-                    } else {
-                        IncomingBubble(msg.content)
-                    }
-                }
-
-                if (isThinking) {
-                    item {
-                        // simple typing indicator
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(12.dp),
-                            horizontalArrangement = Arrangement.Start
-                        ) {
-                            Spacer(modifier = Modifier.width(64.dp))
-                            Text(text = "Pierre is thinking...", fontSize = 12.sp, color = Color(0xFF9CA3AF))
-                        }
-                    }
+            if (isThinking) {
+                item {
+                    Text(
+                        "Le persona réfléchit...",
+                        modifier = Modifier.padding(8.dp),
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
                 }
             }
         }
 
-        // Input Bar
+        // --- INPUT BAR ---
+        // --- BARRE DE SAISIE (InputBar) ---
         Row(
             modifier = Modifier.fillMaxWidth().background(Color(0xFFF3F4F6)).padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { /* attach */ }) {
-                Icon(
-                    imageVector = Icons.Filled.AttachFile,
-                    contentDescription = null
-                )
-            }
             TextField(
                 value = input,
                 onValueChange = { input = it },
                 modifier = Modifier.weight(1f),
-                placeholder = { Text("Ask a question...") })
-            Spacer(modifier = Modifier.width(8.dp))
-            if (input.isBlank()) {
-                IconButton(onClick = { /* mic */ }) { Icon(imageVector = Icons.Filled.Mic, contentDescription = null) }
-            } else {
-                IconButton(onClick = {
-                    // send
-                    viewModel.sendMessage(input)
-                    input = ""
-                }) { Icon(imageVector = Icons.Default.Send, contentDescription = null) }
+                placeholder = { Text("Écrivez votre message...") },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent
+                )
+            )
+            IconButton(
+                onClick = {
+                    if (input.isNotBlank()) {
+                        viewModel.sendMessage(input)
+                        input = ""
+                    }
+                },
+                enabled = input.isNotBlank()
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Send,
+                    contentDescription = "Envoyer",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
-    }
-
-    // Launch loading of conversation
-    LaunchedEffect(conversationId) {
-        viewModel.openSession(conversationId)
     }
 }
 
