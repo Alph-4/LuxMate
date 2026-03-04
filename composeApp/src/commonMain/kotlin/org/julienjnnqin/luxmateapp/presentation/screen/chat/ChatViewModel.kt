@@ -116,19 +116,9 @@ class ChatViewModel(
                 _messagesState.value = current.toList()
 
                 val resp = sendMessageUseCase(currentSessionId, SendMessageRequest(content))
-
-                val assistantText = resp.message ?: resp.structuredResponse?.mainPoint ?: ""
-                if (assistantText.isNotBlank()) {
-                    val assistantMsg = Message(
-                        id = "srv-${Random.nextLong(Long.MAX_VALUE)}",
-                        content = assistantText,
-                        timestamp = "now",
-                        isFromUser = false
-                    )
-                    val updated = _messagesState.value.toMutableList()
-                    updated.add(assistantMsg)
-                    _messagesState.value = updated.toList()
-                }
+                val updated = _messagesState.value.toMutableList()
+                updated.add(resp)
+                _messagesState.value = updated.toList()
 
                 // refresh sessions preview
                 loadSessions()

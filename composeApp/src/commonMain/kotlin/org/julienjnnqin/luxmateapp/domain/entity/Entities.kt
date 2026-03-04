@@ -42,7 +42,7 @@ data class ChatHistory(
     val lastMessage: String
 )
 
-data class LLMResponse(
+data class StructuredResponse(
     val greeting: String,
     val mainPoint: String,
     val details: List<String>,
@@ -53,7 +53,7 @@ data class LLMResponse(
 data class Message(
     val id: String, val content: String,
     val timestamp: String, val isFromUser: Boolean,
-    val structuredData: LLMResponse? = null
+    val structuredData: StructuredResponse? = null
 )
 
 data class Conversation(

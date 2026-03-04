@@ -5,6 +5,7 @@ import org.julienjnnqin.luxmateapp.data.model.ChatSession
 import org.julienjnnqin.luxmateapp.data.model.SendMessageRequest
 import org.julienjnnqin.luxmateapp.data.model.SendMessageResponse
 import org.julienjnnqin.luxmateapp.data.remote.BackendApi
+import org.julienjnnqin.luxmateapp.domain.entity.Message
 import org.julienjnnqin.luxmateapp.domain.repository.ChatRepository
 
 class ChatRepositoryImpl(
@@ -43,7 +44,17 @@ class ChatRepositoryImpl(
     }
 
     // Send message and get response
-    override suspend fun sendMessage(sessionId: String, request: SendMessageRequest): SendMessageResponse {
-        return backendApi.sendMessage(sessionId, request)
+    override suspend fun sendMessage(sessionId: String, request: SendMessageRequest): Message {
+        var response: SendMessageResponse? = null
+        try {
+            println("ChatRepo sending message to sessionId=$sessionId with content='${request.content}'")
+            response = backendApi.sendMessage(sessionId, request)
+            println("✅ ChatRepo received response: message='${response.message}', structuredResponse=${response.structuredResponse}")
+            return response.toDomain()
+        } catch (e: Exception) {
+            println("❌ ChatRepo Error sending message: ${e.message}")
+            // On peut choisir de relancer l'erreur ou de retourner une réponse d'erreur
+            throw e
+        }
     }
 }
