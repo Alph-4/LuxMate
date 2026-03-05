@@ -18,11 +18,9 @@ data class LLMResponse(
 // Pour affichage structuré dans l'UI
 data class StructuredAnswer(
     val greeting: String,
-    @SerialName("main_point")
     val mainPoint: String,
     val details: List<String>,
     val analogy: String,
-    @SerialName("next_step")
     val nextStep: String
 ) {
     companion object {
