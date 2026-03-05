@@ -38,6 +38,12 @@ class LogoutUseCase(
     }
 }
 
+class LoginWithGoogleUseCase(private val repository: AuthRepository) {
+    suspend operator fun invoke(): Result<User> {
+        return repository.googleSignIn()
+    }
+}
+
 class IsUserLoggedInUseCase(private val tokenStore: SettingsRepository) {
     suspend operator fun invoke(): Boolean {
         val token = tokenStore.getAccessToken()

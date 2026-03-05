@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.julienjnnqin.luxmateapp.domain.entity.User
 import org.julienjnnqin.luxmateapp.domain.usecase.LoginUseCase
+import org.julienjnnqin.luxmateapp.domain.usecase.LoginWithGoogleUseCase
 
 data class LoginUiState(
     val email: String = "",
@@ -18,7 +19,8 @@ data class LoginUiState(
 )
 
 class LoginViewModel(
-    private val loginUseCase: LoginUseCase
+    private val loginUseCase: LoginUseCase,
+    private val loginWithGoogleUseCase: LoginWithGoogleUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -51,5 +53,26 @@ class LoginViewModel(
             }
         }
     }
-}
 
+    fun onGoogleSignInClicked() {
+        viewModelScope.launch {
+            // On met à jour l'UI state existant
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+
+            val result = loginWithGoogleUseCase()
+
+            result.onSuccess { user ->
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    user = user,
+                    error = null
+                )
+            }.onFailure { error ->
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = error.message ?: "Erreur d'authentification Google"
+                )
+            }
+        }
+    }
+}

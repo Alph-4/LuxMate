@@ -1,5 +1,6 @@
 package org.julienjnnqin.luxmateapp.presentation.screen.auth
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -208,6 +209,38 @@ fun LoginScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Divider(modifier = Modifier.weight(1f))
+                }
+
+                // Google Sign-In Button
+                OutlinedButton(
+                    onClick = { viewModel.onGoogleSignInClicked() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    enabled = !uiState.isLoading
+                ) {
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                    } else {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            // Optionnel : icône Google (si tu as le logo en ressource)
+                            // Icon(painter = painterResource(Res.drawable.ic_google), contentDescription = null, modifier = Modifier.size(20.dp))
+                            // Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                "Continuer avec Google",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                    }
                 }
 
                 // Sign Up

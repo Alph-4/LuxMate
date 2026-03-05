@@ -23,6 +23,7 @@ import org.julienjnnqin.luxmateapp.presentation.screen.home.HomeViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.onboarding.OnboardingViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.personas.PersonasViewModel
 import org.julienjnnqin.luxmateapp.presentation.screen.profile.ProfileViewModel
+import org.koin.core.module.Module
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 
@@ -31,7 +32,11 @@ import org.koin.dsl.module
  * - Repositories et Use Cases: single (instance unique partagée)
  * - ViewModels: viewModel() (instance unique par écran via Jetpack ViewModel)
  */
+
+expect val platformModule: Module
+
 val appModule = module {
+
 
     // ===== HTTP CLIENT (UNIFIÉ) =====
     single {
@@ -87,7 +92,7 @@ val appModule = module {
 
     // ===== REPOSITORIES =====
     single<OnboardingRepository> { OnboardingRepositoryImpl(get()) }
-    single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
+    single<AuthRepository> { AuthRepositoryImpl(get(), get(), get()) }
     single<TeacherRepository> { TeacherRepositoryImpl(get()) }
     single<UserRepository> { UserRepositoryImpl(get()) }
     single<SettingsRepository> { SettingsRepositoryImpl(get()) }
@@ -120,6 +125,7 @@ val domainModule = module {
     factoryOf(::GetSessionsUseCase)
     factoryOf(::GetSessionUseCase)
     factoryOf(::SendMessageUseCase)
+    factoryOf(::LoginWithGoogleUseCase)
 }
 
 // ===== VIEW MODELS =====

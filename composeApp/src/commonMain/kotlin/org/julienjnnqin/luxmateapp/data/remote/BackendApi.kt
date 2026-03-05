@@ -13,6 +13,8 @@ interface BackendApi {
     suspend fun refreshToken(refreshToken: String): TokenResponse
     suspend fun getCurrentUser(): org.julienjnnqin.luxmateapp.data.model.UserResponse
 
+    suspend fun googleSignIn(token: String): TokenResponse
+
     // PERSONAS
     suspend fun getPersonas(): List<Persona>
     suspend fun getPersonaById(personaId: String): Persona
@@ -66,6 +68,21 @@ class KtorbackendApi(private val client: HttpClient) :
         return body
     }
 
+    override suspend fun googleSignIn(token: String): TokenResponse {
+        println("KtorbackendApi googleSignIn: sending token to backend")
+        val resp = client.post("${API_URL}/auth/google") {
+            contentType(ContentType.Application.Json)
+            setBody(mapOf("id_token" to token))
+        }
+
+        if (isSuccess(resp.status)) {
+            return resp.body()
+        } else {
+            val err = resp.bodyAsText()
+            throw Exception("Google Sign-In failed: $err")
+        }
+    }
+
     override suspend fun getPersonas(): List<Persona> = client.get("$API_URL/personas").body()
 
     override suspend fun getPersonaById(personaId: String): Persona =
@@ -101,6 +118,7 @@ class KtorbackendApi(private val client: HttpClient) :
 
     override suspend fun getCurrentUser(): UserResponse =
         client.get("$API_URL/auth/me").body()
+
 
     override suspend fun getMessages(sessionId: String): List<ChatMessage> {
         println("KtorbackendApi getMessages for sessionId=$sessionId")
