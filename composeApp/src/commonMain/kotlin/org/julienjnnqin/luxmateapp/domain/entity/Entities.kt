@@ -35,11 +35,9 @@ data class OnboardingState(
 @Serializable
 data class ChatHistory(
     val id: String,
-    val teacherId: String,
-    val teacherName: String,
-    val subject: String,
-    val date: String,
-    val lastMessage: String
+    val personaId: String,
+    val personaName: String,
+    val theme: String,
 )
 
 data class StructuredResponse(
@@ -51,8 +49,10 @@ data class StructuredResponse(
 )
 
 data class Message(
-    val id: String, val content: String,
-    val timestamp: String, val isFromUser: Boolean,
+    val id: String,
+    val content: String,
+    val timestamp: String,
+    val isFromUser: Boolean,
     val structuredData: StructuredResponse? = null
 )
 

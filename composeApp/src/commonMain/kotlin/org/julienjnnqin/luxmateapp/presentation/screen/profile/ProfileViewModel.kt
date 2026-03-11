@@ -6,11 +6,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.julienjnnqin.luxmateapp.domain.entity.User
 import org.julienjnnqin.luxmateapp.domain.entity.ChatHistory
-import org.julienjnnqin.luxmateapp.domain.usecase.GetUserProfileUseCase
+import org.julienjnnqin.luxmateapp.domain.entity.User
 import org.julienjnnqin.luxmateapp.domain.usecase.GetChatHistoryUseCase
+import org.julienjnnqin.luxmateapp.domain.usecase.GetUserProfileUseCase
 import org.julienjnnqin.luxmateapp.domain.usecase.LogoutUseCase
+import org.julienjnnqin.luxmateapp.domain.usecase.SetUserLanguageUseCase
 
 data class ProfileUiState(
     val user: User? = null,
@@ -24,13 +25,20 @@ data class ProfileUiState(
 class ProfileViewModel(
     private val getUserProfileUseCase: GetUserProfileUseCase,
     private val getChatHistoryUseCase: GetChatHistoryUseCase,
-    private val logoutUseCase: LogoutUseCase
+    private val logoutUseCase: LogoutUseCase,
+    private val setUserLanguageUseCase: SetUserLanguageUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
     init {
         loadProfileData()
+    }
+
+    private fun setLanguage(language: String) {
+        viewModelScope.launch {
+            setUserLanguageUseCase(language)
+        }
     }
 
     private fun loadProfileData() {

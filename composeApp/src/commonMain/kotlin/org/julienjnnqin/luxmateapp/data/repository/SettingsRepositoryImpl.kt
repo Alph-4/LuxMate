@@ -14,10 +14,14 @@ class SettingsRepositoryImpl(private val settings: Settings) : SettingsRepositor
     companion object {
         private const val KEY_ACCESS_TOKEN = "access_token"
         private const val KEY_REFRESH_TOKEN = "refresh_token"
+        private const val LANGUAGUE_KEY = "language"
     }
 
     private val _isLoggedIn = MutableStateFlow(settings.hasKey("access_token"))
     override val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
+
+    private val _currentLanguage = MutableStateFlow(settings.getStringOrNull(LANGUAGUE_KEY) ?: "en")
+    override val currentLanguage: StateFlow<String> = _currentLanguage.asStateFlow()
 
     override suspend fun getAccessToken(): String? = settings.getStringOrNull(KEY_ACCESS_TOKEN)
 
@@ -33,5 +37,14 @@ class SettingsRepositoryImpl(private val settings: Settings) : SettingsRepositor
         settings.remove(KEY_ACCESS_TOKEN)
         settings.remove(KEY_REFRESH_TOKEN)
         _isLoggedIn.value = false
+    }
+
+    override suspend fun setLanguage(language: String) {
+        settings[LANGUAGUE_KEY] = language
+        _currentLanguage.value = language
+    }
+
+    override suspend fun getLanguage(): String {
+        return settings.getStringOrNull(LANGUAGUE_KEY) ?: "en"
     }
 }

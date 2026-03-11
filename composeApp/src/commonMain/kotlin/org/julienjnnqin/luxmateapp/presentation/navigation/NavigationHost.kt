@@ -63,7 +63,6 @@ fun NavigationHost(
         composable(Screen.Home.route) {
             val viewModel: HomeViewModel = koinViewModel()
             HomeScreen(
-                "John  Doe",
                 viewModel = viewModel
             )
         }
@@ -145,11 +144,12 @@ fun NavigationHost(
             val viewModel: ProfileViewModel = koinViewModel()
             ProfileScreen(
                 viewModel = viewModel,
-                onBackClick = { navController.popBackStack() },
+                onOpenConversation = { sessionId ->
+                    // Navigue vers le détail avec l'ID de session
+                    navController.navigate(Screen.Chat.createRoute(sessionId))
+                },
                 onLogout = {
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(0) { inclusive = true }
-                    }
+                    navController.navigate(Screen.Login.route)
                 }
             )
         }

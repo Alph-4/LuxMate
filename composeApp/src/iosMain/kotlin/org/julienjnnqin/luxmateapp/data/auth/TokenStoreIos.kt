@@ -18,9 +18,13 @@ class TokenStoreIos : SettingsRepository {
     private val _isLoggedIn = MutableStateFlow(userDefaults.stringForKey(KEY_ACCESS) != null)
     override val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
 
+    private val _currentLanguage = MutableStateFlow("en") // Valeur par défaut
+    override val currentLanguage: StateFlow<String> = _currentLanguage.asStateFlow()
+
     private companion object {
         const val KEY_ACCESS = "luxmate_access_token"
         const val KEY_REFRESH = "luxmate_refresh_token"
+        const val KEY_LANGUAGE = "luxmate_language"
     }
 
     override suspend fun getAccessToken(): String? = userDefaults.stringForKey(KEY_ACCESS)
@@ -41,5 +45,15 @@ class TokenStoreIos : SettingsRepository {
 
         // 3. On notifie la déconnexion
         _isLoggedIn.value = false
+    }
+
+    override suspend fun setLanguage(language: String) {
+        userDefaults.setObject(language, forKey = KEY_LANGUAGE)
+        _currentLanguage.value = language
+    }
+
+    override suspend fun getLanguage(): String {
+        _currentLanguage.value = userDefaults.stringForKey(KEY_LANGUAGE) ?: "en"
+        return _currentLanguage.value
     }
 }

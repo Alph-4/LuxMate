@@ -51,6 +51,18 @@ class IsUserLoggedInUseCase(private val tokenStore: SettingsRepository) {
     }
 }
 
+class SetUserLanguageUseCase(private val settingsRepository: SettingsRepository) {
+    suspend operator fun invoke(language: String) {
+        settingsRepository.setLanguage(language)
+    }
+}
+
+class GetUserLanguageUseCase(private val settingsRepository: SettingsRepository) {
+    suspend operator fun invoke(): String {
+        return settingsRepository.getLanguage()
+    }
+}
+
 class GetCurrentUserUseCase(
     private val authRepository: AuthRepository
 ) {

@@ -21,10 +21,15 @@ interface AuthRepository {
 
 interface SettingsRepository {
     val isLoggedIn: kotlinx.coroutines.flow.StateFlow<Boolean>
+    val currentLanguage: kotlinx.coroutines.flow.StateFlow<String>
     suspend fun getAccessToken(): String?
     suspend fun getRefreshToken(): String?
     suspend fun saveUserToken(tokenResponse: TokenResponse)
     suspend fun cleaUserToken()
+
+    suspend fun setLanguage(language: String)
+
+    suspend fun getLanguage(): String
 
 }
 

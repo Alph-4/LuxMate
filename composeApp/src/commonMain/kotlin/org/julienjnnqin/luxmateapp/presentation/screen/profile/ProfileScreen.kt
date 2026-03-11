@@ -8,13 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,14 +24,13 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import org.julienjnnqin.luxmateapp.core.theme.ErrorRed
 import org.julienjnnqin.luxmateapp.core.theme.PrimaryLight
+import org.julienjnnqin.luxmateapp.domain.entity.ChatHistory
 import org.julienjnnqin.luxmateapp.domain.entity.User
-import org.julienjnnqin.luxmateapp.presentation.components.HeaderBar
-import org.julienjnnqin.luxmateapp.presentation.components.TopAppBarProfile
 
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel,
-    onBackClick: () -> Unit,
+    onOpenConversation: (String) -> Unit,
     onLogout: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -51,18 +44,10 @@ fun ProfileScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.statusBars)
             .background(MaterialTheme.colorScheme.background)
-    ) {
-        // Header avec TopAppBar
-        TopAppBarProfile(onBackClick = onBackClick)
-        HeaderBar(
-            leadingBtn = true,
-            leadingBtnAction = onBackClick,
-            title = "Person Profile",
-            trailingBtn = false,
-        )
 
+    ) {
+        println("ProfileScreen: uiState = $uiState")
         if (uiState.isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -73,7 +58,7 @@ fun ProfileScreen(
         } else if (uiState.user != null) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(vertical = 24.dp)
+                contentPadding = PaddingValues(vertical = 100.dp)
             ) {
                 // Profile Section
                 item {
@@ -93,7 +78,9 @@ fun ProfileScreen(
                 }
 
                 items(uiState.chatHistory) { chat ->
-                    ChatHistoryItem(chat = chat)
+                    ChatHistoryItem(chat = chat) { chatId ->
+                        onOpenConversation(chatId)
+                    }
                 }
 
                 // Settings Section
@@ -292,10 +279,14 @@ private fun ProfileHeader(user: User) {
 }
 
 @Composable
-private fun ChatHistoryItem(chat: org.julienjnnqin.luxmateapp.domain.entity.ChatHistory) {
+private fun ChatHistoryItem(
+    chat: ChatHistory,
+    onOpenConversation: (String) -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(onClick = { onOpenConversation(chat.id) })
             .padding(horizontal = 16.dp, vertical = 8.dp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
@@ -333,14 +324,14 @@ private fun ChatHistoryItem(chat: org.julienjnnqin.luxmateapp.domain.entity.Chat
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    chat.teacherName,
+                    chat.personaName,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    "${chat.date} • ${chat.subject}",
+                    chat.theme,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,

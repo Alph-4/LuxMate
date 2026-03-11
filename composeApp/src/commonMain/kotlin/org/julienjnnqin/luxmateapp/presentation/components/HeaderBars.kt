@@ -1,11 +1,11 @@
 package org.julienjnnqin.luxmateapp.presentation.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -63,34 +63,18 @@ fun TextNavItem(title: String) {
         modifier = Modifier,
         contentAlignment = Alignment.Center
     ) {
-        Text(title, color = MaterialTheme.colorScheme.onPrimary)
+        Text(title, color = MaterialTheme.colorScheme.primary)
     }
 }
 
 @Composable
 fun BtnNavItem(onTap: () -> Unit) {
-    Box(
-        modifier = Modifier.size(40.dp)
-            .background(
-                color = MaterialTheme.colorScheme.surface,
-                shape = CircleShape
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = Icons.Filled.Notifications,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(24.dp)
-        )
-        // Badge
-        Box(
-            modifier = Modifier.size(10.dp)
-                .background(
-                    color = Color(0xFF22c55e),
-                    shape = CircleShape
-                )
-                .align(Alignment.TopEnd)
-        )
-    }
+    Icon(
+        imageVector = Icons.Filled.ChevronLeft,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.primary,
+        modifier = Modifier
+            .size(24.dp)
+            .clickable(onClick = onTap)
+    )
 }

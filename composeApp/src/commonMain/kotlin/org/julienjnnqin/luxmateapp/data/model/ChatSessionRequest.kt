@@ -3,6 +3,7 @@ package org.julienjnnqin.luxmateapp.data.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.julienjnnqin.luxmateapp.domain.entity.ChatHistory
 
 @Serializable
 data class ChatSession(
@@ -17,7 +18,16 @@ data class ChatSession(
     val messageCount: Int = 0,
     @SerialName("created_at")
     val createdAt: String
-)
+) {
+    fun toDomain(): ChatHistory {
+        return ChatHistory(
+            id = this.id,
+            personaId = this.personaId,
+            personaName = this.personaName,
+            theme = this.personaTheme,
+        )
+    }
+}
 
 @Serializable
 data class CreateChatSessionRequest(

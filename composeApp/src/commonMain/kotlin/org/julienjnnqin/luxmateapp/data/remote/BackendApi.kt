@@ -116,8 +116,20 @@ class KtorbackendApi(private val client: HttpClient) :
         }
     }
 
-    override suspend fun getCurrentUser(): UserResponse =
-        client.get("$API_URL/auth/me").body()
+    override suspend fun getCurrentUser(): UserResponse {
+        println("KtorbackendApi getCurrentUser: fetching current user profile")
+        val response = client.get("$API_URL/user/me")
+
+        if (response.status == HttpStatusCode.OK) {
+            println("getCurrentUser: success with response=${response.bodyAsText()}")
+            return response.body()
+        } else if (response.status == HttpStatusCode.Unauthorized) {
+            // Ici tu gères la déconnexion ou le refresh token
+            throw Exception("Session expirée, merci de vous reconnecter")
+        } else {
+            throw Exception("Erreur serveur : ${response.status}")
+        }
+    }
 
 
     override suspend fun getMessages(sessionId: String): List<ChatMessage> {

@@ -5,10 +5,10 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import org.julienjnnqin.luxmateapp.domain.repository.SettingsRepository
 import org.julienjnnqin.luxmateapp.domain.usecase.CheckOnboardingCompletedUseCase
-import org.julienjnnqin.luxmateapp.domain.usecase.IsUserLoggedInUseCase
 import org.julienjnnqin.luxmateapp.presentation.navigation.Screen
 
 /**
@@ -18,7 +18,8 @@ import org.julienjnnqin.luxmateapp.presentation.navigation.Screen
  */
 data class AppState(
     val isLoading: Boolean = true,
-    val startDestination: Screen = Screen.Onboarding
+    val startDestination: Screen = Screen.Onboarding,
+    val currentLanguage: String = "en"
 )
 
 /**
@@ -34,62 +35,49 @@ data class AppState(
  */
 class AppViewModel(
     private val checkOnboardingCompletedUseCase: CheckOnboardingCompletedUseCase,
-    private val isUserLoggedInUseCase: IsUserLoggedInUseCase,
     private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
+    // On initialise l'état avec les valeurs par défaut
     private val _appState = MutableStateFlow(AppState())
     val appState: StateFlow<AppState> = _appState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            // On combine l'état d'onboarding et le flux de connexion
-            settingsRepository.isLoggedIn.collect { loggedIn ->
-                val onboardingDone = checkOnboardingCompletedUseCase().getOrDefault(false)
-
-                val destination = when {
-                    !onboardingDone -> Screen.Onboarding
-                    !loggedIn -> Screen.Login
-                    else -> Screen.Home
-                }
-
-                _appState.value = AppState(isLoading = false, startDestination = destination)
-            }
-        }
+        observeAppState()
     }
 
-    /**
-     * Détermine la destination initiale basée sur le statut d'onboarding
-     */
-    private fun loadInitialDestination() {
+    private fun observeAppState() {
         viewModelScope.launch {
-            try {
-
-                // 1. On vérifie l'onboarding
+            // On combine tous les flux importants
+            combine(
+                settingsRepository.isLoggedIn,
+                settingsRepository.currentLanguage,
+                // Onboarding n'est souvent pas un Flow, donc on le récupère au besoin
+            ) { isLoggedIn, language ->
                 val onboardingDone = checkOnboardingCompletedUseCase().getOrDefault(false)
 
-                // 2. On vérifie si un token existe
-                val isLoggedIn = isUserLoggedInUseCase()
-
-                // 3. On calcule la destination
                 val destination = when {
                     !onboardingDone -> Screen.Onboarding
                     !isLoggedIn -> Screen.Login
-                    else -> Screen.Home // L'auto-login se produit ici
+                    else -> Screen.Home
                 }
-                _appState.value = AppState(
+
+                // On met à jour l'état d'un coup !
+                AppState(
                     isLoading = false,
-                    startDestination = destination
+                    startDestination = destination,
+                    currentLanguage = language
                 )
-            } catch (_: Exception) {
-                // En cas d'erreur, afficher l'onboarding par défaut
-                _appState.value = AppState(
-                    isLoading = false,
-                    startDestination = Screen.Onboarding
-                )
+            }.collect { newState ->
+                _appState.value = newState
             }
         }
     }
+
+    // Fonction pour changer la langue depuis l'UI
+    fun changeLanguage(langCode: String) {
+        viewModelScope.launch {
+            settingsRepository.setLanguage(langCode)
+        }
+    }
 }
-
-

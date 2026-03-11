@@ -177,7 +177,7 @@ fun LoginScreen(
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
                     shape = RoundedCornerShape(12.dp),
-                    enabled = !uiState.isLoading
+                    enabled = !uiState.isLoading && (uiState.email.isNotBlank() && uiState.password.isNotBlank())
                 ) {
                     if (uiState.isLoading) {
                         CircularProgressIndicator(

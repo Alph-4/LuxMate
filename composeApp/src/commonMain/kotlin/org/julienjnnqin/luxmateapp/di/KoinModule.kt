@@ -117,6 +117,7 @@ val domainModule = module {
     factoryOf(::CheckOnboardingCompletedUseCase)
     factoryOf(::SetOnboardingCompletedUseCase)
     factoryOf(::LoginUseCase)
+    factoryOf(::LoginWithGoogleUseCase)
     factoryOf(::LogoutUseCase)
     factoryOf(::GetCurrentUserUseCase)
     factoryOf(::GetAllTeachersUseCase)
@@ -128,7 +129,9 @@ val domainModule = module {
     factoryOf(::GetSessionsUseCase)
     factoryOf(::GetSessionUseCase)
     factoryOf(::SendMessageUseCase)
-    factoryOf(::LoginWithGoogleUseCase)
+    factoryOf(::SetUserLanguageUseCase)
+    factoryOf(::GetUserLanguageUseCase)
+
 }
 
 // ===== VIEW MODELS =====

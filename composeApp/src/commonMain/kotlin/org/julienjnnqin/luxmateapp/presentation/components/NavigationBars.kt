@@ -77,37 +77,44 @@ fun BottomNavigationBar(
         Row(
             modifier = Modifier
                 .fillMaxSize()
+                .border(1.dp, Color.Black.copy(alpha = 0.2f), RoundedCornerShape(38.dp))
                 .background(
                     color = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(38.dp)
                 ),
-            horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            BottomNavItem(
-                icon = Icons.Filled.Home,
-                label = "Home",
-                isSelected = selectedIndex == 0,
-                onClick = { onItemSelected(0) }
-            )
-            BottomNavItem(
-                icon = Icons.Filled.BarChart,
-                label = "Personas",
-                isSelected = selectedIndex == 1,
-                onClick = { onItemSelected(1) }
-            )
-            BottomNavItem(
-                icon = Icons.Filled.School,
-                label = "Chat",
-                isSelected = selectedIndex == 2,
-                onClick = { onItemSelected(2) }
-            )
-            BottomNavItem(
-                icon = Icons.Filled.Person,
-                label = "Profile",
-                isSelected = selectedIndex == 3,
-                onClick = { onItemSelected(3) }
-            )
+            Row(
+                modifier = Modifier.padding(4.dp).fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                BottomNavItem(
+                    icon = Icons.Filled.Home,
+                    label = "Home",
+                    isSelected = selectedIndex == 0,
+                    onClick = { onItemSelected(0) }
+                )
+                BottomNavItem(
+                    icon = Icons.Filled.BarChart,
+                    label = "Personas",
+                    isSelected = selectedIndex == 1,
+                    onClick = { onItemSelected(1) }
+                )
+                BottomNavItem(
+                    icon = Icons.Filled.School,
+                    label = "Chat",
+                    isSelected = selectedIndex == 2,
+                    onClick = { onItemSelected(2) }
+                )
+                BottomNavItem(
+                    icon = Icons.Filled.Person,
+                    label = "Profile",
+                    isSelected = selectedIndex == 3,
+                    onClick = { onItemSelected(3) }
+                )
+            }
         }
     }
 }
