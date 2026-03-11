@@ -143,7 +143,15 @@ fun NavigationHost(
 
         composable(Screen.Profile.route) {
             val viewModel: ProfileViewModel = koinViewModel()
-            ProfileScreen(viewModel = viewModel, onBackClick = { navController.popBackStack() })
+            ProfileScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() },
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }
