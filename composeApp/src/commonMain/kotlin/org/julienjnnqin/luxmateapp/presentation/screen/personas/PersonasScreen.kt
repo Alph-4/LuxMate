@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -25,6 +26,7 @@ import org.julienjnnqin.luxmateapp.core.theme.SuccessGreen
 import org.julienjnnqin.luxmateapp.core.utils.TeacherLevel
 import org.julienjnnqin.luxmateapp.core.utils.TeacherTheme
 import org.julienjnnqin.luxmateapp.domain.entity.Persona
+import org.julienjnnqin.luxmateapp.presentation.components.HeaderBar
 import org.julienjnnqin.luxmateapp.presentation.components.TopAppBarTeachers
 
 @Composable
@@ -49,6 +51,12 @@ fun PersonasScreen(
             onNotificationClick = { }
         )
 
+        HeaderBar(
+            title = "Choisissez votre professeur",
+            leadingBtn = false,
+            trailingBtn = false
+        )
+
         if (uiState.isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -61,6 +69,7 @@ fun PersonasScreen(
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(Color.Transparent)
                     .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -232,7 +241,7 @@ private fun TeacherCard(
 
                 // Commencer button
                 Button(
-                    onClick =  startChat ,
+                    onClick = startChat,
                     modifier = Modifier.weight(1.5f),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
