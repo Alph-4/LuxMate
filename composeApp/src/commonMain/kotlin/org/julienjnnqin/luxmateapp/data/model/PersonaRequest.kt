@@ -16,7 +16,7 @@ data class Persona(
     @SerialName("system_prompt")
     val systemPrompt: String? = null,
     @SerialName("llm_provider")
-    val llmProvider: String = "deepseek",  // deepseek or mistral
+    val llmProvider: String = "deepseek",  // deepseek, mistral or gemini
     @SerialName("created_at")
     val createdAt: String
 )

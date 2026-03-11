@@ -25,6 +25,7 @@ import org.julienjnnqin.luxmateapp.core.theme.SuccessGreen
 import org.julienjnnqin.luxmateapp.core.utils.TeacherLevel
 import org.julienjnnqin.luxmateapp.core.utils.TeacherTheme
 import org.julienjnnqin.luxmateapp.domain.entity.Persona
+import org.julienjnnqin.luxmateapp.presentation.components.LlmProviderBadge
 import org.julienjnnqin.luxmateapp.presentation.components.TopAppBarTeachers
 
 @Composable
@@ -208,6 +209,8 @@ private fun TeacherCard(
                         overflow = TextOverflow.Ellipsis,
                         fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    LlmProviderBadge(provider = persona.llmProvider)
                 }
             }
 
@@ -251,7 +254,6 @@ private fun TeacherCard(
         }
     }
 }
-
 
 
 

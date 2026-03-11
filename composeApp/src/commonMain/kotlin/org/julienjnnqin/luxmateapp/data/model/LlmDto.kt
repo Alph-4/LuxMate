@@ -68,3 +68,32 @@ data class MistralResponse(
     val choices: List<MistralChatChoice>,
     val messages: List<MistralMessage>? = null
 )
+
+// Gemini
+@Serializable
+data class GeminiPart(
+    val text: String
+)
+
+@Serializable
+data class GeminiContent(
+    val role: String,
+    val parts: List<GeminiPart>
+)
+
+@Serializable
+data class GeminiRequest(
+    val contents: List<GeminiContent>
+)
+
+@Serializable
+data class GeminiCandidate(
+    val content: GeminiContent,
+    @SerialName("finishReason")
+    val finishReason: String? = null
+)
+
+@Serializable
+data class GeminiResponse(
+    val candidates: List<GeminiCandidate>
+)
