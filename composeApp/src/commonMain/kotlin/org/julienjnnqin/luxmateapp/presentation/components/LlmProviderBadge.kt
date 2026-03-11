@@ -22,9 +22,9 @@ private val providerDeepseekColor = Color(0xFF0EA5E9)
 private val providerMistralColor = Color(0xFF6E57E0)
 private val providerGeminiColor = Color(0xFF1A73E8)
 
-private fun providerInfo(provider: String): Pair<String, Color> = when (provider.lowercase()) {
-    "mistral" -> "Mistral AI" to providerMistralColor
-    "gemini" -> "Google Gemini" to providerGeminiColor
+private fun providerInfo(provider: String): Pair<String, Color> = when {
+    provider.equals("mistral", ignoreCase = true) -> "Mistral AI" to providerMistralColor
+    provider.equals("gemini", ignoreCase = true) -> "Google Gemini" to providerGeminiColor
     else -> "DeepSeek AI" to providerDeepseekColor
 }
 
