@@ -79,6 +79,18 @@ class GetAllTeachersUseCase(
     }
 }
 
+class GetAllFeaturedTeachersUseCase(
+    private val teacherRepository: TeacherRepository
+) {
+    suspend operator fun invoke(): Result<List<Persona>> {
+        val allTeachers = teacherRepository.getAllTeachers()
+
+        return allTeachers.mapCatching { teachers ->
+            teachers.filter { it.isFeatured }
+        }
+    }
+}
+
 class SearchTeachersUseCase(
     private val teacherRepository: TeacherRepository
 ) {

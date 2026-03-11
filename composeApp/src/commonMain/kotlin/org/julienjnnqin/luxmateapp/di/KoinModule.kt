@@ -121,6 +121,7 @@ val domainModule = module {
     factoryOf(::LogoutUseCase)
     factoryOf(::GetCurrentUserUseCase)
     factoryOf(::GetAllTeachersUseCase)
+    factoryOf(::GetAllFeaturedTeachersUseCase)
     factoryOf(::SearchTeachersUseCase)
     factoryOf(::GetUserProfileUseCase)
     factoryOf(::GetChatHistoryUseCase)

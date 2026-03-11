@@ -20,6 +20,7 @@ data class Persona(
     val name: String,
     val subject: String,
     val theme: TeacherTheme,
+    val isFeatured: Boolean = false,
     val level: TeacherLevel,
     val description: String,
     val avatar: String,

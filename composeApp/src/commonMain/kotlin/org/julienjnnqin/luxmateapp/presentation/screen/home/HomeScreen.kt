@@ -12,9 +12,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,11 +26,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.julienjnnqin.luxmateapp.core.utils.TeacherLevel
-import org.julienjnnqin.luxmateapp.core.utils.TeacherTheme
-import org.julienjnnqin.luxmateapp.data.model.User
 import org.julienjnnqin.luxmateapp.domain.entity.ChatHistory
 import org.julienjnnqin.luxmateapp.domain.entity.Persona
+import org.julienjnnqin.luxmateapp.domain.entity.User
 
 
 // Mock data models
@@ -40,16 +38,26 @@ import org.julienjnnqin.luxmateapp.domain.entity.Persona
 fun HomeScreenPreview() {
 
     val fakeUser = User(
-        id = "0", email = "johndoe@gmail.com", createdAt = "2024-01-01T00:00:00Z"
+        id = "0", name = "test", email = "johndoe@gmail.com"
     )
 
-    HomeScreenlContent(fakeUser)
+    HomeScreenContent(fakeUser)
 }
 
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel) {
+fun HomeScreen(
+    viewModel: HomeViewModel,
+    recentMsgSeeAllClick: () -> Unit
+) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(
+        uiState
+    ) {
+        println("HomeScreen LaunchedEffect - UI State: $uiState")
+
+    }
 
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -65,19 +73,24 @@ fun HomeScreen(viewModel: HomeViewModel) {
                 Text(text = "Error: ${uiState.error}", color = Color.Red)
             }
         } else {
-            HomeScreenlContent(user = uiState.user.let {
-                User(
-                    id = "0", email = "",
-                    createdAt = "",
-                )
-            })
+            HomeScreenContent(
+                user = uiState.user ?: User(
+                    id = "0", name = "test", email = "",
+                ),
+                messages = uiState.chatHistory,
+                teachers = uiState.teachers,
+                recentMsgSeeAllClick
+            )
         }
     }
 }
 
 @Composable
-fun HomeScreenlContent(
+fun HomeScreenContent(
     user: User,
+    messages: List<ChatHistory> = emptyList(),
+    teachers: List<Persona> = emptyList(),
+    recentMsgSeeAllClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Surface(modifier = modifier.fillMaxSize()) {
@@ -95,13 +108,14 @@ fun HomeScreenlContent(
                     Spacer(modifier = Modifier.height(18.dp))
                 }
 
+                /*
                 item {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         StatCard(title = "Weekly Goal", subtitle = "+5% from yesterday", progress = 0.75f)
                         StatCard(title = "Daily Streak", subtitle = "You're on fire!", progressText = "12 Days")
                     }
                     Spacer(modifier = Modifier.height(18.dp))
-                }
+                }*/
 
                 item {
                     QuickResumeCard()
@@ -109,36 +123,25 @@ fun HomeScreenlContent(
                 }
 
                 item {
-                    SectionHeader(title = "Suggested for You")
+                    SectionHeader(title = "Start by theme", {})
                     Spacer(modifier = Modifier.height(8.dp))
                     SuggestedGrid()
                     Spacer(modifier = Modifier.height(18.dp))
                 }
 
                 item {
-                    SectionHeader(title = "Featured Teachers")
+                    SectionHeader(title = "Featured Teachers", {})
                     Spacer(modifier = Modifier.height(8.dp))
                     FeaturedTeachersRow(
-                        personas = remember {
-                            listOf(
-                                Persona(
-                                    "123", "Sophia", "NLP Specialist", TeacherTheme.SCIENCE,
-                                    level = TeacherLevel.BEGINNER,
-                                    description = "description",
-                                    avatar = "",
-                                    rating = 4.8f
-                                ),
-                            )
-                        }
+                        personas = teachers
                     )
                     Spacer(modifier = Modifier.height(18.dp))
                 }
 
                 item {
-                    SectionHeader(title = "Recent Messages")
+                    SectionHeader(title = "Recent Messages", recentMsgSeeAllClick = recentMsgSeeAllClick)
                     Spacer(modifier = Modifier.height(8.dp))
-                    //TODO Chat history
-                    //MessagesList(messages = messages)
+                    MessagesList(messages = messages)
                     Spacer(modifier = Modifier.height(80.dp)) // space for bottom nav
                 }
             }
@@ -178,7 +181,7 @@ private fun HeaderSection(name: String) {
 private fun StatCard(title: String, subtitle: String = "", progress: Float? = null, progressText: String? = null) {
     Card(
         modifier = Modifier
-            .height(110.dp),
+            .height(100.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
@@ -277,14 +280,22 @@ private fun QuickResumeCard() {
 }
 
 @Composable
-private fun SectionHeader(title: String) {
+private fun SectionHeader(
+    title: String,
+    recentMsgSeeAllClick: () -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text = title, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF0F1724))
-        Text(text = "See All", fontSize = 12.sp, color = Color(0xFF2563EB))
+        Text(
+            modifier = Modifier.clickable(onClick = recentMsgSeeAllClick),
+            text = "See All",
+            fontSize = 12.sp,
+            color = Color(0xFF2563EB)
+        )
     }
 }
 
@@ -368,7 +379,7 @@ private fun MessagesList(messages: List<ChatHistory>, onOpenConversation: (Strin
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable(onClick = { onOpenConversation(chat.id) })
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(vertical = 8.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface

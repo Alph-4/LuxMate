@@ -63,7 +63,8 @@ fun NavigationHost(
         composable(Screen.Home.route) {
             val viewModel: HomeViewModel = koinViewModel()
             HomeScreen(
-                viewModel = viewModel
+                viewModel = viewModel,
+                recentMsgSeeAllClick = { navController.navigate(Screen.Personas.route) }
             )
         }
 

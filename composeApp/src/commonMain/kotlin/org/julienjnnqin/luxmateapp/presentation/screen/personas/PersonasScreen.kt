@@ -16,7 +16,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -26,9 +25,8 @@ import org.julienjnnqin.luxmateapp.core.theme.SuccessGreen
 import org.julienjnnqin.luxmateapp.core.utils.TeacherLevel
 import org.julienjnnqin.luxmateapp.core.utils.TeacherTheme
 import org.julienjnnqin.luxmateapp.domain.entity.Persona
-import org.julienjnnqin.luxmateapp.presentation.components.LlmProviderBadge
 import org.julienjnnqin.luxmateapp.presentation.components.HeaderBar
-import org.julienjnnqin.luxmateapp.presentation.components.TopAppBarTeachers
+import org.julienjnnqin.luxmateapp.presentation.components.LlmProviderBadge
 
 @Composable
 fun PersonasScreen(
@@ -43,20 +41,10 @@ fun PersonasScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.statusBars)
-            .background(MaterialTheme.colorScheme.background)
+            .windowInsetsPadding(WindowInsets.statusBars),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        // Header avec TopAppBar
-        TopAppBarTeachers(
-            onMenuClick = { },
-            onNotificationClick = { }
-        )
 
-        HeaderBar(
-            title = "Choisissez votre professeur",
-            leadingBtn = false,
-            trailingBtn = false
-        )
 
         if (uiState.isLoading) {
             Box(
@@ -66,11 +54,52 @@ fun PersonasScreen(
                 CircularProgressIndicator()
             }
         } else {
-            // Filter Chips
+            PersonasScreenContent(uiState, setCategory = { cat ->
+                viewModel.setCategory(cat)
+            }, onPersonaSelected, startChatWithPersona)
+        }
+    }
+}
+
+@Composable
+fun PersonasScreenContent(
+    uiState: PersonaUiState,
+    setCategory: (String) -> Unit,
+    onPersonaSelected: (String) -> Unit,
+    startChatWithPersona: (String) -> Unit
+) {
+    Box() {
+
+        // Teachers List
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(top = 120.dp, bottom = 120.dp)
+        ) {
+            items(uiState.personas) { persona ->
+                TeacherCard(
+                    persona = persona,
+                    onSelect = { onPersonaSelected(persona.id) },
+                    startChat = { startChatWithPersona(persona.id) }
+                )
+            }
+        }
+
+        Column {
+            // Header Bar
+            HeaderBar(
+                title = "Choisissez votre professeur",
+                leadingBtn = false,
+                trailingBtn = false
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.Transparent)
                     .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -78,7 +107,7 @@ fun PersonasScreen(
                 items(categories) { category ->
                     FilterChip(
                         selected = uiState.selectedTheme?.name == category,
-                        onClick = { viewModel.setCategory(category) },
+                        onClick = { setCategory(category) },
                         label = {
                             Text(
                                 category,
@@ -95,26 +124,8 @@ fun PersonasScreen(
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Teachers List
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(bottom = 120.dp)
-            ) {
-                items(uiState.personas) { persona ->
-                    TeacherCard(
-                        persona = persona,
-                        onSelect = { onPersonaSelected(persona.id) },
-                        startChat = { startChatWithPersona(persona.id) }
-                    )
-                }
-            }
         }
+
     }
 }
 

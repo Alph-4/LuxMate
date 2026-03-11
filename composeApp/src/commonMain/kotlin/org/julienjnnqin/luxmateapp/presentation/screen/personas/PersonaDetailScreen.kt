@@ -32,6 +32,7 @@ fun PersonaDetailScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.statusBars)
             .background(MaterialTheme.colorScheme.background)
     ) {
         // Top Bar

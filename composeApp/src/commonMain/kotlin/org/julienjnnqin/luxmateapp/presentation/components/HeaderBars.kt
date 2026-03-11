@@ -39,8 +39,9 @@ fun HeaderBar(
 ) {
     Row(
         modifier = modifier
-            .fillMaxWidth(0.94f)
-            .height(64.dp)
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .height(56.dp)
             .shadow(20.dp, RoundedCornerShape(28.dp), ambientColor = Color.LightGray)
             .background(
                 color = Color.White,
