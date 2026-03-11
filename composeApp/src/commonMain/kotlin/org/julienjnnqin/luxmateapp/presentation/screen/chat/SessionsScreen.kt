@@ -20,6 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 import org.julienjnnqin.luxmateapp.domain.entity.Conversation
 
 /**
@@ -28,6 +30,7 @@ import org.julienjnnqin.luxmateapp.domain.entity.Conversation
  * - ChatDetailScreen: shows messages, message bubbles, input bar with send/attach/mic.
  * Both screens use ChatViewModel provided in commonMain.
  */
+@Preview
 @Composable
 fun SessionsListScreen(
     viewModel: ChatViewModel,

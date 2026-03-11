@@ -62,21 +62,24 @@ val appModule = module {
                     refreshTokens {
                         println("REFRSH: Ktor a détecté une 401 avec challenge, tentative...")
                         val settings = get<SettingsRepository>()
-                        try {
-                            val oldRefresh = settings.getRefreshToken() ?: return@refreshTokens null
+                        val oldRefresh = settings.getRefreshToken() ?: return@refreshTokens null
 
-                            // On utilise un client temporaire ou on fait l'appel
-                            // sans repasser par le plugin Auth pour éviter une boucle
+                        try {
+
+                            // Utilise une instance de HttpClient SANS le plugin Auth pour le refresh
+                            // ou assure-toi que l'URL est différente.
                             val response = client.post("https://luxmate.up.railway.app/auth/refresh") {
                                 contentType(ContentType.Application.Json)
                                 setBody(RefreshTokenRequest(oldRefresh))
-                                markAsRefreshTokenRequest() // Important pour Ktor
+                                // On force cette requête à ignorer le plugin Auth pour éviter la boucle
+                                markAsRefreshTokenRequest()
                             }.body<TokenResponse>()
 
                             settings.saveUserToken(response)
                             BearerTokens(response.accessToken, response.refreshToken)
                         } catch (e: Exception) {
-                            settings.cleaUserToken() // Ta typo préférée ;)
+                            println("REFRESH FAILED: Nettoyage des tokens... erreur: ${e.message}")
+                            settings.cleaUserToken() // ICI : ton AppViewModel va maintenant réagir !
                             null
                         }
                     }

@@ -42,10 +42,10 @@ fun ProfileScreen(
         // Header avec TopAppBar
         TopAppBarProfile(onBackClick = onBackClick)
         HeaderBar(
-            trailingBtn = true,
-            trailingBtnAction = onBackClick,
+            leadingBtn = true,
+            leadingBtnAction = onBackClick,
             title = "Person Profile",
-            leadingBtn = false,
+            trailingBtn = false,
         )
 
         if (uiState.isLoading) {

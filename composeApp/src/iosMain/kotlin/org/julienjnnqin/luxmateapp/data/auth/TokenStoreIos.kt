@@ -1,33 +1,45 @@
 package org.julienjnnqin.luxmateapp.data.auth
 
-import org.julienjnnqin.luxmateapp.data.model.TokenResponse
-import platform.Foundation.NSUserDefaults
-
 /**
  * Simple iOS TokenStore using NSUserDefaults. For production use, prefer storing tokens in the
  * Keychain.
  */
-class TokenStoreIos : TokenStore {
-    private val defaults = NSUserDefaults.standardUserDefaults()
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import org.julienjnnqin.luxmateapp.data.model.TokenResponse
+import org.julienjnnqin.luxmateapp.domain.repository.SettingsRepository
+import platform.Foundation.NSUserDefaults
+
+class TokenStoreIos : SettingsRepository {
+    private val userDefaults = NSUserDefaults.standardUserDefaults
+
+    // 1. Initialisation du StateFlow avec la valeur actuelle en cache
+    private val _isLoggedIn = MutableStateFlow(userDefaults.stringForKey(KEY_ACCESS) != null)
+    override val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
 
     private companion object {
         const val KEY_ACCESS = "luxmate_access_token"
         const val KEY_REFRESH = "luxmate_refresh_token"
     }
 
-    override suspend fun getAccessToken(): String? = defaults.stringForKey(KEY_ACCESS)
+    override suspend fun getAccessToken(): String? = userDefaults.stringForKey(KEY_ACCESS)
 
-    override suspend fun getRefreshToken(): String? = defaults.stringForKey(KEY_REFRESH)
+    override suspend fun getRefreshToken(): String? = userDefaults.stringForKey(KEY_REFRESH)
 
-    override suspend fun save(tokenResponse: TokenResponse) {
-        defaults.setObject(tokenResponse.accessToken, KEY_ACCESS)
-        defaults.setObject(tokenResponse.refreshToken, KEY_REFRESH)
-        defaults.synchronize()
+    override suspend fun saveUserToken(tokenResponse: TokenResponse) {
+        userDefaults.setObject(tokenResponse.accessToken, forKey = KEY_ACCESS)
+        userDefaults.setObject(tokenResponse.refreshToken, forKey = KEY_REFRESH)
+
+        // 2. On notifie le changement
+        _isLoggedIn.value = true
     }
 
-    override suspend fun clear() {
-        defaults.removeObjectForKey(KEY_ACCESS)
-        defaults.removeObjectForKey(KEY_REFRESH)
-        defaults.synchronize()
+    override suspend fun cleaUserToken() {
+        userDefaults.removeObjectForKey(KEY_ACCESS)
+        userDefaults.removeObjectForKey(KEY_REFRESH)
+
+        // 3. On notifie la déconnexion
+        _isLoggedIn.value = false
     }
 }

@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.julienjnnqin.luxmateapp.domain.repository.SettingsRepository
 import org.julienjnnqin.luxmateapp.domain.usecase.CheckOnboardingCompletedUseCase
 import org.julienjnnqin.luxmateapp.domain.usecase.IsUserLoggedInUseCase
 import org.julienjnnqin.luxmateapp.presentation.navigation.Screen
@@ -33,14 +34,28 @@ data class AppState(
  */
 class AppViewModel(
     private val checkOnboardingCompletedUseCase: CheckOnboardingCompletedUseCase,
-    private val isUserLoggedInUseCase: IsUserLoggedInUseCase
+    private val isUserLoggedInUseCase: IsUserLoggedInUseCase,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val _appState = MutableStateFlow(AppState())
     val appState: StateFlow<AppState> = _appState.asStateFlow()
 
     init {
-        loadInitialDestination()
+        viewModelScope.launch {
+            // On combine l'état d'onboarding et le flux de connexion
+            settingsRepository.isLoggedIn.collect { loggedIn ->
+                val onboardingDone = checkOnboardingCompletedUseCase().getOrDefault(false)
+
+                val destination = when {
+                    !onboardingDone -> Screen.Onboarding
+                    !loggedIn -> Screen.Login
+                    else -> Screen.Home
+                }
+
+                _appState.value = AppState(isLoading = false, startDestination = destination)
+            }
+        }
     }
 
     /**
