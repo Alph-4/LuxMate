@@ -222,7 +222,6 @@ private fun QuickResumeCard() {
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.Yellow)
             .shadow(
                 elevation = 2.dp, clip = true,
                 shape = RoundedCornerShape(20.dp)
@@ -231,8 +230,7 @@ private fun QuickResumeCard() {
     ) {
         Row(
             modifier = Modifier
-                .padding(16.dp)
-                .background(Color.Blue),
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -252,15 +250,16 @@ private fun QuickResumeCard() {
             Spacer(modifier = Modifier.width(12.dp))
             Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .background(Color.Red),
+                    .weight(1f),
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.Start
-            ) {
+                horizontalAlignment = Alignment.Start,
+
+                ) {
                 Column(modifier = Modifier) {
                     Text(text = "LAST LESSON WITH PIERRE", fontSize = 12.sp, color = Color(0xFF6B7280))
                     Text(text = "Neural Networks 101", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 }
+                Spacer(modifier = Modifier.height(8.dp))
                 Card(
                     shape = RoundedCornerShape(32.dp),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F4F6))
