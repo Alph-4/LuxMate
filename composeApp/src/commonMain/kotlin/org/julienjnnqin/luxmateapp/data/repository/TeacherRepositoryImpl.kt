@@ -27,7 +27,8 @@ class TeacherRepositoryImpl(
                             )
                         }&background=random",
                         rating = 4.5f,
-                        theme = TeacherTheme.ART
+                        theme = TeacherTheme.ART,
+                        llmProvider = p.llmProvider
                     )
                 }
             Result.success(Personas)
@@ -54,7 +55,8 @@ class TeacherRepositoryImpl(
                     }&background=random",
 
                     rating = 4.5f,
-                    theme = TeacherTheme.ART
+                    theme = TeacherTheme.ART,
+                    llmProvider = persona.llmProvider
 
                 )
             Result.success(personna)
@@ -86,7 +88,8 @@ class TeacherRepositoryImpl(
                                 )
                             }&background=random",
                             rating = 4.5f,
-                            theme = TeacherTheme.ART
+                            theme = TeacherTheme.ART,
+                            llmProvider = p.llmProvider
                         )
                     }
             Result.success(filtered)
