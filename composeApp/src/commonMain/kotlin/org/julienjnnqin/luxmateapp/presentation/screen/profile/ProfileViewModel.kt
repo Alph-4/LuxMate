@@ -10,17 +10,21 @@ import org.julienjnnqin.luxmateapp.domain.entity.User
 import org.julienjnnqin.luxmateapp.domain.entity.ChatHistory
 import org.julienjnnqin.luxmateapp.domain.usecase.GetUserProfileUseCase
 import org.julienjnnqin.luxmateapp.domain.usecase.GetChatHistoryUseCase
+import org.julienjnnqin.luxmateapp.domain.usecase.LogoutUseCase
 
 data class ProfileUiState(
     val user: User? = null,
     val chatHistory: List<ChatHistory> = emptyList(),
     val isLoading: Boolean = false,
+    val isLoggingOut: Boolean = false,
+    val loggedOut: Boolean = false,
     val error: String? = null
 )
 
 class ProfileViewModel(
     private val getUserProfileUseCase: GetUserProfileUseCase,
-    private val getChatHistoryUseCase: GetChatHistoryUseCase
+    private val getChatHistoryUseCase: GetChatHistoryUseCase,
+    private val logoutUseCase: LogoutUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
@@ -61,6 +65,40 @@ class ProfileViewModel(
 
     fun refresh() {
         loadProfileData()
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isLoggingOut = true,
+                loggedOut = false,
+                error = null
+            )
+            logoutUseCase()
+                .onSuccess {
+                    _uiState.value = _uiState.value.copy(
+                        isLoggingOut = false,
+                        loggedOut = true,
+                        error = null
+                    )
+                }
+                .onFailure { error ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoggingOut = false,
+                        loggedOut = false,
+                        error = error.message
+                    )
+                }
+        }
+    }
+
+    /**
+     * Call this from the UI after handling the logout navigation event to
+     * reset the one-shot `loggedOut` flag and avoid re-triggering navigation
+     * on recomposition or state restoration.
+     */
+    fun onLogoutHandled() {
+        _uiState.value = _uiState.value.copy(loggedOut = false)
     }
 }
 
