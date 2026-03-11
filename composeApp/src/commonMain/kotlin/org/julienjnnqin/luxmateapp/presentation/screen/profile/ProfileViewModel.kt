@@ -69,15 +69,36 @@ class ProfileViewModel(
 
     fun logout() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoggingOut = true)
+            _uiState.value = _uiState.value.copy(
+                isLoggingOut = true,
+                loggedOut = false,
+                error = null
+            )
             logoutUseCase()
                 .onSuccess {
-                    _uiState.value = _uiState.value.copy(isLoggingOut = false, loggedOut = true)
+                    _uiState.value = _uiState.value.copy(
+                        isLoggingOut = false,
+                        loggedOut = true,
+                        error = null
+                    )
                 }
                 .onFailure { error ->
-                    _uiState.value = _uiState.value.copy(isLoggingOut = false, error = error.message)
+                    _uiState.value = _uiState.value.copy(
+                        isLoggingOut = false,
+                        loggedOut = false,
+                        error = error.message
+                    )
                 }
         }
+    }
+
+    /**
+     * Call this from the UI after handling the logout navigation event to
+     * reset the one-shot `loggedOut` flag and avoid re-triggering navigation
+     * on recomposition or state restoration.
+     */
+    fun onLogoutHandled() {
+        _uiState.value = _uiState.value.copy(loggedOut = false)
     }
 }
 
