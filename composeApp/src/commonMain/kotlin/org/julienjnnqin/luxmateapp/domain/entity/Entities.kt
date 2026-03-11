@@ -23,7 +23,8 @@ data class Persona(
     val level: TeacherLevel,
     val description: String,
     val avatar: String,
-    val rating: Float = 0f
+    val rating: Float = 0f,
+    val llmProvider: String = "deepseek"
 )
 
 @Serializable

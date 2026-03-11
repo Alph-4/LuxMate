@@ -21,6 +21,7 @@ import coil3.compose.AsyncImage
 import org.julienjnnqin.luxmateapp.core.theme.PrimaryLight
 import org.julienjnnqin.luxmateapp.core.theme.SuccessGreen
 import org.julienjnnqin.luxmateapp.domain.entity.Persona
+import org.julienjnnqin.luxmateapp.presentation.components.LlmProviderBadge
 
 @Composable
 fun PersonaDetailScreen(
@@ -118,9 +119,17 @@ fun PersonaDetailScreen(
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                // Quote
+                // LLM Provider badge
+                LlmProviderBadge(
+                    provider = persona.llmProvider,
+                    horizontalPadding = 12.dp,
+                    verticalPadding = 6.dp,
+                    iconSize = 16.dp
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
