@@ -20,6 +20,7 @@ interface AuthRepository {
 }
 
 interface SettingsRepository {
+    val isLoggedIn: kotlinx.coroutines.flow.StateFlow<Boolean>
     suspend fun getAccessToken(): String?
     suspend fun getRefreshToken(): String?
     suspend fun saveUserToken(tokenResponse: TokenResponse)

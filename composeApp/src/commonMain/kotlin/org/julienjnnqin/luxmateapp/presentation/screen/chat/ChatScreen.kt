@@ -32,8 +32,27 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.julienjnnqin.luxmateapp.domain.entity.Message
 import org.julienjnnqin.luxmateapp.presentation.components.HeaderBar
+
+@Preview
+@Composable
+fun ChatDetailScreenPreview() {
+    // On crée de la donnée de test
+    val fakeMessages = listOf(
+        Message(id = "blop", timestamp = "now", content = "Bonjour ! Comment puis-je t'aider ?", isFromUser = false),
+        Message(id = "blip", timestamp = "5 minute ago", content = "Explique moi la loi d'Ohm", isFromUser = true)
+    )
+
+    // On affiche le contenu sans avoir besoin de ViewModel !
+    ChatDetailContent(
+        messages = fakeMessages,
+        isThinking = true, // On peut tester l'état "réflexion" facilement
+        onBack = {},
+        onSendMessage = {}
+    )
+}
 
 @Composable
 fun ChatDetailScreen(
@@ -43,12 +62,30 @@ fun ChatDetailScreen(
 ) {
     val messages by viewModel.messagesState.collectAsState()
     val isThinking by viewModel.isThinking.collectAsState()
-    var input by remember { mutableStateOf("") }
-    val listState = rememberLazyListState()
 
     LaunchedEffect(sessionId) {
         viewModel.createSessionAndOpen(sessionId)
     }
+
+    // On appelle la version "Content"
+    ChatDetailContent(
+        messages = messages,
+        isThinking = isThinking,
+        onBack = onBack,
+        onSendMessage = { content -> viewModel.sendMessage(content) }
+    )
+}
+
+@Composable
+fun ChatDetailContent(
+    messages: List<Message>,
+    isThinking: Boolean,
+    onBack: () -> Unit,
+    onSendMessage: (String) -> Unit
+) {
+    var input by remember { mutableStateOf("") }
+    val listState = rememberLazyListState()
+
 
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size - 1)
@@ -77,8 +114,9 @@ fun ChatDetailScreen(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .windowInsetsPadding(WindowInsets.statusBars),
-            trailingBtn = true,
-            trailingBtnAction = onBack,
+            trailingBtn = false,
+            leadingBtn = true,
+            leadingBtnAction = onBack,
             title = "Professor Pierre",
         )
 
@@ -93,7 +131,7 @@ fun ChatDetailScreen(
                 onTextChange = { input = it },
                 onSend = {
                     if (input.isNotBlank()) {
-                        viewModel.sendMessage(input)
+                        onSendMessage(input)
                         input = ""
                     }
                 }

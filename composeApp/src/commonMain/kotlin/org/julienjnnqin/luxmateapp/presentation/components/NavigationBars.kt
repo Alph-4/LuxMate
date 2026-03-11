@@ -60,7 +60,7 @@ fun BottomNavigationBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(103.dp)
+            .height(80.dp)
             .background(Color.Transparent)
             .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
             .dropShadow(
@@ -125,7 +125,7 @@ private fun BottomNavItem(
     ) {
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(size = 16.dp))
+                .clip(RoundedCornerShape(size = 38.dp))
                 .clickable(onClick = onClick)
                 .border(
                     shape = RoundedCornerShape(size = 16.dp), color = MaterialTheme.colorScheme.surface,
@@ -148,7 +148,7 @@ private fun BottomNavItem(
                 Icon(
                     imageVector = icon,
                     contentDescription = label,
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(18.dp),
                     tint = if (isSelected)
                         MaterialTheme.colorScheme.primary
                     else
@@ -159,7 +159,10 @@ private fun BottomNavItem(
                 Text(
                     text = label,
                     maxLines = 1,
-                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 15.sp),
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontSize = 12.sp,
+                        fontWeight = MaterialTheme.typography.labelMedium.fontWeight
+                    ),
                     color = if (isSelected)
                         MaterialTheme.colorScheme.primary
                     else
