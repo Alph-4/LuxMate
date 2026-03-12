@@ -141,7 +141,23 @@ fun HomeScreenContent(
                 item {
                     SectionHeader(title = "Recent Messages", recentMsgSeeAllClick = recentMsgSeeAllClick)
                     Spacer(modifier = Modifier.height(8.dp))
-                    MessagesList(messages = messages)
+                    if (messages.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp)
+                                .background(Color(0xFFF3F4F6), shape = RoundedCornerShape(12.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(8.dp),
+                                text = "No recent messages. Start a conversation with a teacher!",
+                                color = Color(0xFF6B7280)
+                            )
+                        }
+                    } else {
+                        MessagesList(messages = messages)
+                    }
                     Spacer(modifier = Modifier.height(80.dp)) // space for bottom nav
                 }
             }

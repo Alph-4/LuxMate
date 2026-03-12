@@ -45,19 +45,11 @@ fun PersonasScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
 
+        PersonasScreenContent(uiState, setCategory = { cat ->
+            viewModel.setCategory(cat)
+        }, onPersonaSelected, startChatWithPersona)
 
-        if (uiState.isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            PersonasScreenContent(uiState, setCategory = { cat ->
-                viewModel.setCategory(cat)
-            }, onPersonaSelected, startChatWithPersona)
-        }
+
     }
 }
 
@@ -70,22 +62,33 @@ fun PersonasScreenContent(
 ) {
     Box() {
 
-        // Teachers List
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(top = 120.dp, bottom = 120.dp)
-        ) {
-            items(uiState.personas) { persona ->
-                TeacherCard(
-                    persona = persona,
-                    onSelect = { onPersonaSelected(persona.id) },
-                    startChat = { startChatWithPersona(persona.id) }
-                )
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            // Teachers List
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(top = 120.dp, bottom = 120.dp)
+            ) {
+                items(uiState.personas) { persona ->
+                    TeacherCard(
+                        persona = persona,
+                        onSelect = { onPersonaSelected(persona.id) },
+                        startChat = { startChatWithPersona(persona.id) }
+                    )
+                }
             }
         }
+
+
 
         Column {
             // Header Bar

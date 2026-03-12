@@ -70,7 +70,7 @@ class KtorbackendApi(private val client: HttpClient) :
 
     override suspend fun googleSignIn(token: String): TokenResponse {
         println("KtorbackendApi googleSignIn: sending token to backend")
-        val resp = client.post("${API_URL}/auth/google") {
+        val resp = client.post("${API_URL}/auth/google-signin") {
             contentType(ContentType.Application.Json)
             setBody(mapOf("id_token" to token))
         }

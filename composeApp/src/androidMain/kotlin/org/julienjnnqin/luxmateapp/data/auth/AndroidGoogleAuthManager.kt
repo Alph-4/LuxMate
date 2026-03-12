@@ -16,7 +16,7 @@ class GoogleAuthManager(private val context: Context) : SocialAuthManager {
             .setFilterByAuthorizedAccounts(false)
             // ATTENTION : Utilise ici ton WEB CLIENT ID (celui de ton backend)
             .setServerClientId("202071320891-ojkgbokb6e3045atfjanr6le6c6cpkic.apps.googleusercontent.com")
-            .setAutoSelectEnabled(true)
+            .setAutoSelectEnabled(false)
             .build()
 
         val request = GetCredentialRequest.Builder()

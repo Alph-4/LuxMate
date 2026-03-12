@@ -13,7 +13,8 @@ import org.julienjnnqin.luxmateapp.domain.usecase.SearchTeachersUseCase
 
 data class PersonaUiState(
     val personas: List<Persona> = emptyList(),
-    val selectedTheme: TeacherTheme? = null,
+    val filteredPersonas: List<Persona> = emptyList(),
+    val selectedTheme: TeacherTheme = TeacherTheme.ALL,
     val searchQuery: String = "",
     val isLoading: Boolean = false,
     val error: String? = null
@@ -76,7 +77,19 @@ class PersonasViewModel(
         }
     }
 
+    private fun filterPersonasByCategory(category: String) {
+        val filtered = _uiState.value.personas.filter { it.theme.name == category }
+        _uiState.value = _uiState.value.copy(filteredPersonas = filtered)
+    }
+
     fun setCategory(category: String?) {
-            _uiState.value = _uiState.value.copy(selectedTheme = TeacherTheme.entries.firstOrNull { it.name == category })
+        _uiState.value = _uiState.value.copy(selectedTheme = TeacherTheme.entries.firstOrNull { it.name == category }
+            ?: TeacherTheme.ALL)
+        if (category == null || category == TeacherTheme.ALL.name) {
+            //loadPersonas()
+        } else {
+            filterPersonasByCategory(category)
+        }
+
     }
 }
