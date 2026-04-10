@@ -1,27 +1,48 @@
 package org.julienjnnqin.luxmateapp.presentation.navigation
 
-var mainRoute = arrayOf(Screen.Home.route, Screen.Personas.route, Screen.SessionsList.route, Screen.Profile.route)
+import kotlinx.serialization.Serializable
+import kotlin.reflect.KClass
 
-sealed class Screen(val route: String) {
-    data object Onboarding : Screen("onboarding")
+// Routes principales pour la bottom navigation
+val mainRoutes: List<KClass<out Screen>> = listOf(
+    Screen.Home::class,
+    Screen.Personas::class,
+    Screen.SessionsList::class,
+    Screen.Profile::class
+)
 
-    data object Login : Screen("login")
+@Serializable
+sealed interface Screen {
+    @Serializable
+    data object Onboarding : Screen
 
-    data object Home : Screen("home")
-    data object Profile : Screen("profile")
+    @Serializable
+    data object Login : Screen
 
-    data object Personas : Screen("personas")
+    @Serializable
+    data object Home : Screen
 
-    data object PersonaDetail : Screen("personaDetail/{personaId}") {
-        const val ARG_PERSONA_ID = "personaId"
-        fun createRoute(personaId: String) = "personaDetail/$personaId"
-    }
+    @Serializable
+    data object Personas : Screen
 
-    data object SessionsList : Screen("sessionsList") {
-    }
+    @Serializable
+    data class PersonaDetail(val personaId: String) : Screen
 
-    data object Chat : Screen("chat/{sessionId}") {
-        const val ARG_SESSION_ID = "sessionId"
-        fun createRoute(sessionId: String) = "chat/$sessionId"
-    }
+    @Serializable
+    data object SessionsList : Screen
+
+    @Serializable
+    data class Chat(val sessionId: String) : Screen
+
+    @Serializable
+    data object Profile : Screen
+}
+
+// Extension pour vérifier si une route est dans mainRoutes
+fun String?.isMainRoute(): Boolean {
+    if (this == null) return false
+    return this.contains("Home") ||
+            this.contains("Personas") ||
+            this.contains("SessionsList") ||
+            this.contains("Profile")
 }

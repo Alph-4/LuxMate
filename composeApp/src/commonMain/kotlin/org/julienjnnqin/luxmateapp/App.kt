@@ -21,19 +21,12 @@ import org.julienjnnqin.luxmateapp.presentation.AppViewModel
 import org.julienjnnqin.luxmateapp.presentation.components.BottomNavigationBar
 import org.julienjnnqin.luxmateapp.presentation.navigation.NavigationHost
 import org.julienjnnqin.luxmateapp.presentation.navigation.Screen
-import org.julienjnnqin.luxmateapp.presentation.navigation.mainRoute
+import org.julienjnnqin.luxmateapp.presentation.navigation.isMainRoute
 import org.koin.compose.viewmodel.koinViewModel
 
-/**
- * Point d'entrée de l'application
- * Initialise Koin et affiche le thème
- * Gère l'état de chargement initial et la navigation
- */
 @Composable
 @Preview
 fun App() {
-    //initializeKoin()
-
     LuxMateAppTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -44,26 +37,19 @@ fun App() {
     }
 }
 
-/**
- * Contenu principal de l'application
- * Affiche le spinner de chargement ou la navigation
- * Détermine la destination initiale basée sur l'état de l'app
- */
 @Composable
 fun AppContent() {
-    // ViewModel de l'app pour déterminer la destination initiale
     val appViewModel: AppViewModel = koinViewModel()
-    val appState = appViewModel.appState.collectAsState().value
+    val appState by appViewModel.appState.collectAsState()
     val navController = rememberNavController()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
 
-    LaunchedEffect(navController) {
-        println("Current route: ${navController.currentDestination?.route}")
+    LaunchedEffect(currentRoute) {
+        println("Current route: $currentRoute")
     }
 
     if (appState.isLoading) {
-        // Affiche un spinner pendant le chargement de l'état initial
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -71,39 +57,62 @@ fun AppContent() {
             CircularProgressIndicator()
         }
     } else {
-
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .navigationBarsPadding(),
             bottomBar = {
-                if (currentRoute in mainRoute) {
+                // ✅ Vérifie si on est sur une route principale
+                if (currentRoute.isMainRoute()) {
                     BottomNavigationBar(
-                        selectedIndex = when (currentRoute) {
-                            Screen.Home.route -> 0
-                            Screen.Personas.route -> 1
-                            Screen.SessionsList.route -> 2
-                            Screen.Profile.route -> 3
+                        selectedIndex = when {
+                            currentRoute?.contains("Home") == true -> 0
+                            currentRoute?.contains("Personas") == true -> 1
+                            currentRoute?.contains("SessionsList") == true -> 2
+                            currentRoute?.contains("Profile") == true -> 3
                             else -> 0
                         },
-                        onItemSelected = {
-                            when (it) {
-                                0 -> navController.navigate(Screen.Home.route)
-                                1 -> navController.navigate(Screen.Personas.route)
-                                2 -> navController.navigate(Screen.SessionsList.route)
-                                3 -> navController.navigate(Screen.Profile.route)
+                        onItemSelected = { index ->
+                            when (index) {
+                                0 -> navController.navigate(Screen.Home) {
+                                    popUpTo(navController.graph.startDestinationId) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                                1 -> navController.navigate(Screen.Personas) {
+                                    popUpTo(navController.graph.startDestinationId) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                                2 -> navController.navigate(Screen.SessionsList) {
+                                    popUpTo(navController.graph.startDestinationId) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                                3 -> navController.navigate(Screen.Profile) {
+                                    popUpTo(navController.graph.startDestinationId) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             }
-                        },
+                        }
                     )
                 }
             }
-        ) {
-
+        ) { paddingValues ->
             NavigationHost(
                 navController = navController,
-                startDestination = appState.startDestination
+                startDestination = appState.startDestination,
+                modifier = Modifier
             )
-
         }
     }
 }
